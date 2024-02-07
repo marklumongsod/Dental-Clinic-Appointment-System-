@@ -229,11 +229,6 @@ if (isset($_POST['submit'])) {
                 </div>
             </a>
 
-            <!--  <div class="box">
-                <img src="assets/MetalCeramicBraces.png" alt="">
-                <h3>Metal/Ceramic Braces</h3>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officiis, culpa!</p>
-            </div> -->
 
             <a href="Fixed_JacketCrown.php">
                 <div class="box">
@@ -242,12 +237,6 @@ if (isset($_POST['submit'])) {
                     <p>Tooth jacket crowns are described as complete porcelain ceramic.</p>
                 </div>
             </a>
-
-            <!--  <div class="box">
-                <img src="assets/JacketCrown.png" alt="">
-                <h3>Fixed Partial Denture/Jacket Crown</h3>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Officiis, culpa!</p>
-            </div> -->
 
             <a href="Fixed_PorcelainBridge.php">
                 <div class="box">
