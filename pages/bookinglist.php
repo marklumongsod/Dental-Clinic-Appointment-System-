@@ -1,10 +1,10 @@
-<?php 
+<?php
 
 session_start();
 include('../dbconnect.php');
 
 if (!isset($_SESSION['id'])) {
-       
+
     $_SESSION['error_message'] = "You must log in to access this page.";
     header("Location: ../index_admin.php");
     exit();
@@ -64,7 +64,12 @@ if (!isset($_SESSION['id'])) {
         ============================================ -->
     <script src="js/vendor/modernizr-2.8.3.min.js"></script>
     <link rel="icon" type="image/jpg" href="../assets/Ortho.jpg">
-    
+    <style>
+        .empty-list-item {
+            height: 470px;
+            /* Adjust the height as needed for spacing */
+        }
+    </style>
 </head>
 
 <body class="materialdesign">
@@ -85,24 +90,23 @@ if (!isset($_SESSION['id'])) {
                 <div class="left-custom-menu-adp-wrap">
                     <ul class="nav navbar-nav left-sidebar-menu-pro">
                         <li>
-                            <a href="dashboard.php" role="button" aria-expanded="false" class="nav-link"><i
-                                    class="fa big-icon fa-home"></i> <span class="mini-dn">Dashboard</span> </a>
+                            <a href="dashboard.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fa-home"></i> <span class="mini-dn">Dashboard</span> </a>
                         </li>
                         <li class="active" style="background-color: #03a9f0">
-                            <a href="bookinglist.php" role="button" aria-expanded="false" class="nav-link"><i
-                                    class="fa big-icon fa-book"></i> <span class="mini-dn">Booking</span> </a>
+                            <a href="bookinglist.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fa-book"></i> <span class="mini-dn">View Schedules</span> </a>
                         </li>
                         <li class="active">
-                            <a href="transaction_history.php" role="button" aria-expanded="false" class="nav-link"><i
-                                    class="fa big-icon fa-credit-card"></i> <span class="mini-dn">Transaction History</span> </a>
+                            <a href="patient_history.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fas fa-user"></i> <span class="mini-dn">Patient Records</span> </a>
                         </li>
                         <li class="active">
                             <a href="inventory.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fas fa-clipboard"></i> <span class="mini-dn">Inventory</span> </a>
                         </li>
                         <li class="active">
-                            <a href="patient_history.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fas fa-user"></i> <span class="mini-dn">Patient History</span> </a>
+                            <a href="transaction_history.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fa-credit-card"></i> <span class="mini-dn">Transaction History</span> </a>
                         </li>
-                       <!-- <li class="active">
+
+
+                        <!-- <li class="active">
                             <a href="clientinfo.php" role="button" aria-expanded="false" class="nav-link"><i
                                     class="fa big-icon fa-list-alt"></i> <span class="mini-dn">Client Information</span>
                             </a>
@@ -117,6 +121,12 @@ if (!isset($_SESSION['id'])) {
                                     class="fa big-icon fa-calendar"></i> <span class="mini-dn">Income Report</span> </a>
                         </li>-->
 
+                        <li class="empty-list-item"></li>
+                        <!-- New sidebar button for Config (moved to the bottom) -->
+                        <li>
+                            <a href="config.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fas fa-cog"></i> <span class="mini-dn">Config</span> </a>
+                        </li>
+
                     </ul>
                 </div>
             </nav>
@@ -128,8 +138,7 @@ if (!isset($_SESSION['id'])) {
                     <div class="container-fluid">
                         <div class="row">
                             <div class="col-lg-1 col-md-6 col-sm-6 col-xs-12">
-                                <button type="button" id="sidebarCollapse"
-                                    class="btn bar-button-pro header-drl-controller-btn btn-info navbar-btn">
+                                <button type="button" id="sidebarCollapse" class="btn bar-button-pro header-drl-controller-btn btn-info navbar-btn">
                                     <i class="fa fa-bars"></i>
                                 </button>
                                 <div class="admin-logo logo-wrap-pro">
@@ -148,20 +157,15 @@ if (!isset($_SESSION['id'])) {
 
 
                                         <li class="nav-item">
-                                            <a href="#" data-toggle="dropdown" role="button" aria-expanded="false"
-                                                class="nav-link dropdown-toggle">
-                                                <span
-                                                    class="adminpro-icon adminpro-user-rounded header-riht-inf"></span>
+                                            <a href="#" data-toggle="dropdown" role="button" aria-expanded="false" class="nav-link dropdown-toggle">
+                                                <span class="adminpro-icon adminpro-user-rounded header-riht-inf"></span>
                                                 <span class="admin-name">Administrator</span>
-                                                <span
-                                                    class="author-project-icon adminpro-icon adminpro-down-arrow"></span>
+                                                <span class="author-project-icon adminpro-icon adminpro-down-arrow"></span>
                                             </a>
-                                            <ul role="menu"
-                                                class="dropdown-header-top author-log dropdown-menu animated flipInX">
+                                            <ul role="menu" class="dropdown-header-top author-log dropdown-menu animated flipInX">
 
 
-                                                <li><a href="logout.php"><span
-                                                            class="adminpro-icon adminpro-locked author-log-ic"></span>Log
+                                                <li><a href="logout.php"><span class="adminpro-icon adminpro-locked author-log-ic"></span>Log
                                                         Out</a>
                                                 </li>
                                             </ul>
@@ -196,8 +200,7 @@ if (!isset($_SESSION['id'])) {
                                     <div class="main-sparkline13-hd">
                                         <h1>Booking Table</h1>
                                         <div class="sparkline13-outline-icon">
-                                            <span class="sparkline13-collapse-link"><i
-                                                    class="fa fa-chevron-up"></i></span>
+                                            <span class="sparkline13-collapse-link"><i class="fa fa-chevron-up"></i></span>
                                             <span><i class="fa fa-wrench"></i></span>
                                             <span class="sparkline13-collapse-close"><i class="fa fa-times"></i></span>
                                         </div>
@@ -205,22 +208,18 @@ if (!isset($_SESSION['id'])) {
                                 </div>
                                 <div class="sparkline13-graph">
                                     <div class="datatable-dashv1-list custom-datatable-overright">
-                                        <div id="add"
-                                            class="modal modal-adminpro-general modal-zoomInDown fade zoomInDown animated in"
-                                            role="dialog">
+                                        <div id="add" class="modal modal-adminpro-general modal-zoomInDown fade zoomInDown animated in" role="dialog">
                                             <div class="modal-dialog">
                                                 <form action="#">
                                                     <div class="modal-content">
                                                         <div class="modal-close-area modal-close-df">
-                                                            <a class="close" data-dismiss="modal" href="#"><i
-                                                                    class="fa fa-close"></i></a>
+                                                            <a class="close" data-dismiss="modal" href="#"><i class="fa fa-close"></i></a>
                                                         </div>
                                                         <div class="modal-body">
                                                             <div class="modal-login-form-inner">
                                                                 <div class="row">
                                                                     <div class="col-lg-12">
-                                                                        <div
-                                                                            class="basic-login-inner modal-basic-inner">
+                                                                        <div class="basic-login-inner modal-basic-inner">
                                                                             <h3>Add Category</h3>
                                                                             <p>Fill In :</p>
                                                                             <div class="form-group-inner">
@@ -229,9 +228,7 @@ if (!isset($_SESSION['id'])) {
                                                                                         <label class="">Name</label>
                                                                                     </div>
                                                                                     <div class="col-lg-8">
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            placeholder="Enter Category Name">
+                                                                                        <input type="text" class="form-control" placeholder="Enter Category Name">
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -241,9 +238,7 @@ if (!isset($_SESSION['id'])) {
                                                                                         <label class="">Status</label>
                                                                                     </div>
                                                                                     <div class="col-lg-8">
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            placeholder="Enter Category Status">
+                                                                                        <input type="text" class="form-control" placeholder="Enter Category Status">
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -253,8 +248,7 @@ if (!isset($_SESSION['id'])) {
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <a data-dismiss="modal" href="#"
-                                                                style="margin-right: 44%">Cancel</a>
+                                                            <a data-dismiss="modal" href="#" style="margin-right: 44%">Cancel</a>
                                                             <a href="#" style="margin-right: 10%">Save</a>
                                                         </div>
                                                 </form>
@@ -262,11 +256,11 @@ if (!isset($_SESSION['id'])) {
                                         </div>
                                     </div>
                                     <?php
-                                        $sql = "SELECT * FROM booking_applicant";
-                                        $result = mysqli_query($con, $sql);
+                                    $sql = "SELECT * FROM booking_applicant";
+                                    $result = mysqli_query($con, $sql);
 
-                                        if (mysqli_num_rows($result) > 0) {
-                                            echo '<table id="table" data-toggle="table" data-pagination="true" data-search="true"
+                                    if (mysqli_num_rows($result) > 0) {
+                                        echo '<table id="table" data-toggle="table" data-pagination="true" data-search="true"
                                                 data-show-columns="true" data-show-pagination-switch="false"
                                                 data-show-refresh="true" data-key-events="true" data-show-toggle="false"
                                                 data-resizable="true" data-cookie="true" data-cookie-id-table="saveId"
@@ -287,62 +281,57 @@ if (!isset($_SESSION['id'])) {
                                                     </tr>
                                                 </thead>
                                                 <tbody>';
-                                            while ($row = mysqli_fetch_assoc($result)) {
-                                                echo '<tr>';
-                                                echo '<td>' . $row['date_created'] . '</td>';
-                                                echo '<td>' . $row['appointment_code'] . '</td>';
-                                                echo '<td>' . $row['name'] . '</td>';
-                                                echo '<td>' . $row['email'] . '</td>';
-                                                echo '<td>' . $row['phone_number'] . '</td>';
-                                                echo '<td>' . $row['service'] . '</td>';
-                                                echo '<td><i>₱' . number_format($row['price'], 2) . '</i></td>';
-                                                echo '<td>' . date('F j, Y', strtotime($row['appointment_date'])) . '</td>';
-                                                echo '<td>' . $row['appointment_time'] . '</td>';
-                                                echo '<td style="color: ' . 
-                                                (($row['remark'] == 'Completed') ? 'green' : 
-                                                (($row['remark'] == 'Cancelled') ? 'red' : 
-                                                (($row['remark'] == 'Failure to attend') ? 'red' : 'black'))) . ';">' . 
+                                        while ($row = mysqli_fetch_assoc($result)) {
+                                            echo '<tr>';
+                                            echo '<td>' . $row['date_created'] . '</td>';
+                                            echo '<td>' . $row['appointment_code'] . '</td>';
+                                            echo '<td>' . $row['name'] . '</td>';
+                                            echo '<td>' . $row['email'] . '</td>';
+                                            echo '<td>' . $row['phone_number'] . '</td>';
+                                            echo '<td>' . $row['service'] . '</td>';
+                                            echo '<td><i>₱' . number_format($row['price'], 2) . '</i></td>';
+                                            echo '<td>' . date('F j, Y', strtotime($row['appointment_date'])) . '</td>';
+                                            echo '<td>' . $row['appointment_time'] . '</td>';
+                                            echo '<td style="color: ' .
+                                                (($row['remark'] == 'Completed') ? 'green' : (($row['remark'] == 'Cancelled') ? 'red' : (($row['remark'] == 'Failure to attend') ? 'red' : 'black'))) . ';">' .
                                                 (($row['remark'] != '') ? $row['remark'] : 'N/A') . '</td>';
-                                                echo '<td>';
-                                                echo '<form method="post" action="' . $_SERVER['PHP_SELF'] . '">';
-                                                echo '<input type="hidden" name="applicant_id" value="' . $row['booking_id'] . '">';
-                                                echo '<select name="status">';
-                                                echo '<option value=" ">Select Status</option>'; 
-                                                echo '<option value="Failure to attend">Failure to attend</option>';
-                                                echo '<option value="Cancelled">Cancelled</option>';
-                                                echo '</select>';
-                                                echo '<input type="submit" name="update_remark" value="Update">';
-                                                echo '</form>';
-                                                echo '</td>';
-                                                echo '</tr>';
-                                            }
-                                            echo '</tbody></table>';
-                                        } else {
-                                            echo 'No data found.';
-                                        }                                        
-
-                                        if (isset($_POST['update_remark'])) {
-                                            $applicant_id = $_POST['applicant_id'];
-                                            $status = $_POST['status'];
-
-                                            $update_sql = "UPDATE booking_applicant SET remark = '$status' WHERE booking_id = $applicant_id";
-                                            if (mysqli_query($con, $update_sql)) {
-                                                echo '<script>window.location.href = window.location.pathname;</script>';
-                                                exit;
-                                            } else {
-                                                echo '<script>alert("Error updating remark: ' . mysqli_error($con) . '");</script>';
-                                            }
+                                            echo '<td>';
+                                            echo '<form method="post" action="' . $_SERVER['PHP_SELF'] . '">';
+                                            echo '<input type="hidden" name="applicant_id" value="' . $row['booking_id'] . '">';
+                                            echo '<select name="status">';
+                                            echo '<option value=" ">Select Status</option>';
+                                            echo '<option value="Failure to attend">Failure to attend</option>';
+                                            echo '<option value="Cancelled">Cancelled</option>';
+                                            echo '</select>';
+                                            echo '<input type="submit" name="update_remark" value="Update">';
+                                            echo '</form>';
+                                            echo '</td>';
+                                            echo '</tr>';
                                         }
-                                        ?>
-                                    <div id="edit"
-                                        class="modal modal-adminpro-general modal-zoomInDown fade zoomInDown animated in"
-                                        role="dialog">
+                                        echo '</tbody></table>';
+                                    } else {
+                                        echo 'No data found.';
+                                    }
+
+                                    if (isset($_POST['update_remark'])) {
+                                        $applicant_id = $_POST['applicant_id'];
+                                        $status = $_POST['status'];
+
+                                        $update_sql = "UPDATE booking_applicant SET remark = '$status' WHERE booking_id = $applicant_id";
+                                        if (mysqli_query($con, $update_sql)) {
+                                            echo '<script>window.location.href = window.location.pathname;</script>';
+                                            exit;
+                                        } else {
+                                            echo '<script>alert("Error updating remark: ' . mysqli_error($con) . '");</script>';
+                                        }
+                                    }
+                                    ?>
+                                    <div id="edit" class="modal modal-adminpro-general modal-zoomInDown fade zoomInDown animated in" role="dialog">
                                         <div class="modal-dialog">
                                             <form action="#">
                                                 <div class="modal-content">
                                                     <div class="modal-close-area modal-close-df">
-                                                        <a class="close" data-dismiss="modal" href="#"><i
-                                                                class="fa fa-close"></i></a>
+                                                        <a class="close" data-dismiss="modal" href="#"><i class="fa fa-close"></i></a>
                                                     </div>
                                                     <div class="modal-body">
                                                         <div class="modal-login-form-inner">
@@ -357,9 +346,7 @@ if (!isset($_SESSION['id'])) {
                                                                                     <label class="">Name</label>
                                                                                 </div>
                                                                                 <div class="col-lg-8">
-                                                                                    <input type="text"
-                                                                                        class="form-control"
-                                                                                        placeholder="Enter Category Name">
+                                                                                    <input type="text" class="form-control" placeholder="Enter Category Name">
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -369,9 +356,7 @@ if (!isset($_SESSION['id'])) {
                                                                                     <label class="">Status</label>
                                                                                 </div>
                                                                                 <div class="col-lg-8">
-                                                                                    <input type="text"
-                                                                                        class="form-control"
-                                                                                        placeholder="Enter Category Status">
+                                                                                    <input type="text" class="form-control" placeholder="Enter Category Status">
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -381,8 +366,7 @@ if (!isset($_SESSION['id'])) {
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
-                                                        <a data-dismiss="modal" href="#"
-                                                            style="margin-right: 44%">Cancel</a>
+                                                        <a data-dismiss="modal" href="#" style="margin-right: 44%">Cancel</a>
                                                         <a href="#" style="margin-right: 10%">Save</a>
                                                     </div>
                                             </form>

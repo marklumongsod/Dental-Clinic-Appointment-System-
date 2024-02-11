@@ -4,7 +4,7 @@ session_start();
 include('../dbconnect.php');
 
 if (!isset($_SESSION['id'])) {
-       
+
     $_SESSION['error_message'] = "You must log in to access this page.";
     header("Location: ../index_admin.php");
     exit();
@@ -65,6 +65,12 @@ if (!isset($_SESSION['id'])) {
 		============================================ -->
     <script src="js/vendor/modernizr-2.8.3.min.js"></script>
     <link rel="icon" type="image/jpg" href="../assets/Ortho.jpg">
+    <style>
+        .empty-list-item {
+            height: 470px;
+            /* Adjust the height as needed for spacing */
+        }
+    </style>
 </head>
 
 <body class="materialdesign">
@@ -88,18 +94,20 @@ if (!isset($_SESSION['id'])) {
                             <a href="dashboard.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fa-home"></i> <span class="mini-dn">Dashboard</span> </a>
                         </li>
                         <li class="active">
-                            <a href="bookinglist.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fa-book"></i> <span class="mini-dn">Booking</span> </a>
+                            <a href="bookinglist.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fa-book"></i> <span class="mini-dn">View Schedules</span> </a>
                         </li>
                         <li class="active">
-                            <a href="transaction_history.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fa-credit-card"></i> <span class="mini-dn">Transaction History</span> </a>
+                            <a href="patient_history.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fas fa-user"></i> <span class="mini-dn">Patient Records</span> </a>
                         </li>
                         <li class="active">
                             <a href="inventory.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fas fa-clipboard"></i> <span class="mini-dn">Inventory</span> </a>
                         </li>
                         <li class="active">
-                            <a href="patient_history.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fas fa-user"></i> <span class="mini-dn">Patient History</span> </a>
+                            <a href="transaction_history.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fa-credit-card"></i> <span class="mini-dn">Transaction History</span> </a>
                         </li>
-                       <!-- <li class="active">
+
+
+                        <!-- <li class="active">
                             <a href="clientinfo.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fa-list-alt"></i> <span class="mini-dn">Client Information</span>
                             </a>
                         </li>
@@ -110,6 +118,12 @@ if (!isset($_SESSION['id'])) {
                         <li class="active">
                             <a href="incomereport.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fa-calendar"></i> <span class="mini-dn">Income Report</span> </a>
                         </li>-->
+
+                        <li class="empty-list-item"></li>
+                        <!-- New sidebar button for Config (moved to the bottom) -->
+                        <li>
+                            <a href="config.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fas fa-cog"></i> <span class="mini-dn">Config</span> </a>
+                        </li>
 
                     </ul>
                 </div>
@@ -189,23 +203,23 @@ if (!isset($_SESSION['id'])) {
                                     </div>
                                 </div>
                                 <div class="income-dashone-pro">
-                                <div class="income-rate-total">
-                                <div class="price-adminpro-rate">
-                                    <?php 
-                                    $sql = "SELECT COUNT(*) FROM booking_applicant";
-                                    $result = mysqli_query($con, $sql);
+                                    <div class="income-rate-total">
+                                        <div class="price-adminpro-rate">
+                                            <?php
+                                            $sql = "SELECT COUNT(*) FROM booking_applicant";
+                                            $result = mysqli_query($con, $sql);
 
-                                    $count_booking = mysqli_fetch_array($result)[0];
-                                    ?>
-                                    <h3><span class="counter"><?php echo $count_booking; ?></span></h3>
-                                </div>
+                                            $count_booking = mysqli_fetch_array($result)[0];
+                                            ?>
+                                            <h3><span class="counter"><?php echo $count_booking; ?></span></h3>
+                                        </div>
                                         <div class="price-graph">
                                             <span id="sparkline1"></span>
                                         </div>
                                     </div>
                                     <div class="income-range">
                                         <p>Total Bookings</p>
-                                        
+
                                         <span class="income-percentange"> <i class="fa fa-level-up"></i></span>
                                     </div>
                                     <div class="clear"></div>
@@ -225,17 +239,17 @@ if (!isset($_SESSION['id'])) {
                                 <div class="income-dashone-pro">
                                     <div class="income-rate-total">
                                         <div class="price-adminpro-rate">
-                                        <?php 
-                                        $sql = "SELECT SUM(ba.price) 
+                                            <?php
+                                            $sql = "SELECT IFNULL(SUM(ba.price), 0) 
                                         FROM booking_applicant ba
                                         INNER JOIN applicant_payment ap ON ba.booking_id = ap.applicant_id
                                         WHERE ba.remark = 'Completed' AND ba.booking_id = ap.applicant_id;
                                         ";
-                                        $result = mysqli_query($con, $sql);
+                                            $result = mysqli_query($con, $sql);
 
-                                        $count_total = mysqli_fetch_array($result)[0];
-                                        
-                                        ?>
+                                            $count_total = mysqli_fetch_array($result)[0];
+
+                                            ?>
                                             <h3>₱<span class="counter"><?php echo number_format($count_total, 2); ?></span></h3>
                                         </div>
                                         <div class="price-graph">
@@ -263,12 +277,12 @@ if (!isset($_SESSION['id'])) {
                                 <div class="income-dashone-pro">
                                     <div class="income-rate-total">
                                         <div class="price-adminpro-rate">
-                                        <?php
-                                        $sql = "SELECT COUNT(*) FROM booking_applicant WHERE remark = 'Completed'";
-                                        $result = mysqli_query($con, $sql);
+                                            <?php
+                                            $sql = "SELECT COUNT(*) FROM booking_applicant WHERE remark = 'Completed'";
+                                            $result = mysqli_query($con, $sql);
 
-                                        $count_completed = mysqli_fetch_array($result)[0];
-                                        ?>
+                                            $count_completed = mysqli_fetch_array($result)[0];
+                                            ?>
 
                                             <h3><span class="counter"><?php echo $count_completed ?></span></h3>
                                         </div>
@@ -297,12 +311,12 @@ if (!isset($_SESSION['id'])) {
                                 <div class="income-dashone-pro">
                                     <div class="income-rate-total">
                                         <div class="price-adminpro-rate">
-                                        <?php 
-                                        $sql = "SELECT COUNT(DISTINCT name) FROM booking_applicant";
-                                        $result = mysqli_query($con, $sql);
+                                            <?php
+                                            $sql = "SELECT COUNT(DISTINCT name) FROM booking_applicant";
+                                            $result = mysqli_query($con, $sql);
 
-                                        $count_booking1 = mysqli_fetch_array($result)[0];
-                                        ?>
+                                            $count_booking1 = mysqli_fetch_array($result)[0];
+                                            ?>
                                             <h3><span class="counter"><?php echo $count_booking1; ?></span></h3>
                                         </div>
                                         <div class="price-graph">
