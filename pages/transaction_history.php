@@ -1,10 +1,10 @@
-<?php 
+<?php
 
 session_start();
 include('../dbconnect.php');
 
 if (!isset($_SESSION['id'])) {
-       
+
     $_SESSION['error_message'] = "You must log in to access this page.";
     header("Location: ../index_admin.php");
     exit();
@@ -66,41 +66,42 @@ if (!isset($_SESSION['id'])) {
     <script src="js/vendor/modernizr-2.8.3.min.js"></script>
     <link rel="icon" type="image/jpg" href="../assets/Ortho.jpg">
     <style>
+        .button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+            cursor: pointer;
+            width: 150px;
+            height: 50px;
+            background-image: linear-gradient(to top, #D8D9DB 0%, #fff 80%, #FDFDFD 100%);
+            border-radius: 30px;
+            border: 1px solid #8F9092;
+            transition: all 0.2s ease;
+            font-family: "Source Sans Pro", sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #606060;
+            text-shadow: 0 1px #fff;
+            margin-left: auto;
+        }
 
-.button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  outline: none;
-  cursor: pointer;
-  width: 150px;
-  height: 50px;
-  background-image: linear-gradient(to top, #D8D9DB 0%, #fff 80%, #FDFDFD 100%);
-  border-radius: 30px;
-  border: 1px solid #8F9092;
-  transition: all 0.2s ease;
-  font-family: "Source Sans Pro", sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: #606060;
-  text-shadow: 0 1px #fff;
-  margin-left: auto;
-}
+        .button:hover {
+            box-shadow: 0 4px 3px 1px #FCFCFC, 0 6px 8px #D6D7D9, 0 -4px 4px #CECFD1, 0 -6px 4px #FEFEFE, inset 0 0 3px 3px #CECFD1;
+        }
 
-.button:hover {
-  box-shadow: 0 4px 3px 1px #FCFCFC, 0 6px 8px #D6D7D9, 0 -4px 4px #CECFD1, 0 -6px 4px #FEFEFE, inset 0 0 3px 3px #CECFD1;
-}
+        .button:active {
+            box-shadow: 0 4px 3px 1px #FCFCFC, 0 6px 8px #D6D7D9, 0 -4px 4px #CECFD1, 0 -6px 4px #FEFEFE, inset 0 0 5px 3px #999, inset 0 0 30px #aaa;
+        }
 
-.button:active {
-  box-shadow: 0 4px 3px 1px #FCFCFC, 0 6px 8px #D6D7D9, 0 -4px 4px #CECFD1, 0 -6px 4px #FEFEFE, inset 0 0 5px 3px #999, inset 0 0 30px #aaa;
-}
+        .button:focus {
+            box-shadow: 0 4px 3px 1px #FCFCFC, 0 6px 8px #D6D7D9, 0 -4px 4px #CECFD1, 0 -6px 4px #FEFEFE, inset 0 0 5px 3px #999, inset 0 0 30px #aaa;
+        }
 
-.button:focus {
-  box-shadow: 0 4px 3px 1px #FCFCFC, 0 6px 8px #D6D7D9, 0 -4px 4px #CECFD1, 0 -6px 4px #FEFEFE, inset 0 0 5px 3px #999, inset 0 0 30px #aaa;
-}
-
-
-
+        .empty-list-item {
+            height: 470px;
+            /* Adjust the height as needed for spacing */
+        }
     </style>
 </head>
 
@@ -121,39 +122,29 @@ if (!isset($_SESSION['id'])) {
                 </div>
                 <div class="left-custom-menu-adp-wrap">
                     <ul class="nav navbar-nav left-sidebar-menu-pro">
+                        <!-- Existing sidebar buttons -->
                         <li>
-                            <a href="dashboard.php" role="button" aria-expanded="false" class="nav-link"><i
-                                    class="fa big-icon fa-home"></i> <span class="mini-dn">Dashboard</span> </a>
+                            <a href="dashboard.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fa-home"></i> <span class="mini-dn">Dashboard</span> </a>
                         </li>
                         <li class="">
-                            <a href="bookinglist.php" role="button" aria-expanded="false" class="nav-link"><i
-                                    class="fa big-icon fa-book"></i> <span class="mini-dn">Booking</span> </a>
+                            <a href="bookinglist.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fa-book"></i> <span class="mini-dn">View Schedules</span> </a>
                         </li>
-                        <li class="active" style="background-color: #03a9f0">
-                            <a href="transaction_history.php" role="button" aria-expanded="false" class="nav-link"><i
-                                    class="fa big-icon fa-credit-card"></i> <span class="mini-dn">Transaction History</span> </a>
+                        <li class="active">
+                            <a href="patient_history.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fas fa-user"></i> <span class="mini-dn">Patient Records</span> </a>
                         </li>
                         <li class="active">
                             <a href="inventory.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fas fa-clipboard"></i> <span class="mini-dn">Inventory</span> </a>
                         </li>
-                        <li class="active">
-                            <a href="patient_history.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fas fa-user"></i> <span class="mini-dn">Patient History</span> </a>
+                        <li class="active" style="background-color: #03a9f0">
+                            <a href="transaction_history.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fa-credit-card"></i> <span class="mini-dn">Transaction History</span> </a>
                         </li>
-                      <!--   <li class="active">
-                            <a href="clientinfo.php" role="button" aria-expanded="false" class="nav-link"><i
-                                    class="fa big-icon fa-list-alt"></i> <span class="mini-dn">Client Information</span>
-                            </a>
-                        </li>
-                        <li class="active">
-                            <a href="databasebackup.php" role="button" aria-expanded="false" class="nav-link"><i
-                                    class="fa big-icon fa-database"></i> <span class="mini-dn">Database Backup</span>
-                            </a>
-                        </li>
-                        <li class="active">
-                            <a href="incomereport.php" role="button" aria-expanded="false" class="nav-link"><i
-                                    class="fa big-icon fa-calendar"></i> <span class="mini-dn">Income Report</span> </a>
-                        </li>-->
 
+                        <!-- Empty list item for spacing -->
+                        <li class="empty-list-item"></li>
+                        <!-- New sidebar button for Config (moved to the bottom) -->
+                        <li>
+                            <a href="config.php" role="button" aria-expanded="false" class="nav-link"><i class="fa big-icon fas fa-cog"></i> <span class="mini-dn">Config</span> </a>
+                        </li>
                     </ul>
                 </div>
             </nav>
@@ -165,8 +156,7 @@ if (!isset($_SESSION['id'])) {
                     <div class="container-fluid">
                         <div class="row">
                             <div class="col-lg-1 col-md-6 col-sm-6 col-xs-12">
-                                <button type="button" id="sidebarCollapse"
-                                    class="btn bar-button-pro header-drl-controller-btn btn-info navbar-btn">
+                                <button type="button" id="sidebarCollapse" class="btn bar-button-pro header-drl-controller-btn btn-info navbar-btn">
                                     <i class="fa fa-bars"></i>
                                 </button>
                                 <div class="admin-logo logo-wrap-pro">
@@ -185,20 +175,15 @@ if (!isset($_SESSION['id'])) {
 
 
                                         <li class="nav-item">
-                                            <a href="#" data-toggle="dropdown" role="button" aria-expanded="false"
-                                                class="nav-link dropdown-toggle">
-                                                <span
-                                                    class="adminpro-icon adminpro-user-rounded header-riht-inf"></span>
+                                            <a href="#" data-toggle="dropdown" role="button" aria-expanded="false" class="nav-link dropdown-toggle">
+                                                <span class="adminpro-icon adminpro-user-rounded header-riht-inf"></span>
                                                 <span class="admin-name">Administrator</span>
-                                                <span
-                                                    class="author-project-icon adminpro-icon adminpro-down-arrow"></span>
+                                                <span class="author-project-icon adminpro-icon adminpro-down-arrow"></span>
                                             </a>
-                                            <ul role="menu"
-                                                class="dropdown-header-top author-log dropdown-menu animated flipInX">
+                                            <ul role="menu" class="dropdown-header-top author-log dropdown-menu animated flipInX">
 
 
-                                                <li><a href="logout.php"><span
-                                                            class="adminpro-icon adminpro-locked author-log-ic"></span>Log
+                                                <li><a href="logout.php"><span class="adminpro-icon adminpro-locked author-log-ic"></span>Log
                                                         Out</a>
                                                 </li>
                                             </ul>
@@ -233,8 +218,7 @@ if (!isset($_SESSION['id'])) {
                                     <div class="main-sparkline13-hd">
                                         <h1>Payment Transaction</h1>
                                         <div class="sparkline13-outline-icon">
-                                            <span class="sparkline13-collapse-link"><i
-                                                    class="fa fa-chevron-up"></i></span>
+                                            <span class="sparkline13-collapse-link"><i class="fa fa-chevron-up"></i></span>
                                             <span><i class="fa fa-wrench"></i></span>
                                             <span class="sparkline13-collapse-close"><i class="fa fa-times"></i></span>
                                         </div>
@@ -242,158 +226,154 @@ if (!isset($_SESSION['id'])) {
                                 </div>
                                 <div class="sparkline13-graph">
                                     <div class="datatable-dashv1-list custom-datatable-overright">
-                                        <button class="btn btn-default" style="margin-bottom:0.1%; margin-left: 66.5%"
-                                            data-toggle="modal" data-target="#add"><i class="fa fa-plus"></i></button>
-                                        <div id="add"
-                                            class="modal modal-adminpro-general modal-zoomInDown fade zoomInDown animated in"
-                                            role="dialog">
+                                        <button class="btn btn-default" style="margin-bottom:0.1%; margin-left: 66.5%" data-toggle="modal" data-target="#add"><i class="fa fa-plus"></i></button>
+                                        <div id="add" class="modal modal-adminpro-general modal-zoomInDown fade zoomInDown animated in" role="dialog">
                                             <div class="modal-dialog">
-                                                
-                                                    <div class="modal-content">
-                                                        <div class="modal-close-area modal-close-df">
-                                                            <a class="close" data-dismiss="modal" href="#"><i
-                                                                    class="fa fa-close"></i></a>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <div class="modal-login-form-inner">
-                                                                <div class="row">
-                                                                    <div class="col-lg-12">
-                                                                        <div
-                                                                            class="basic-login-inner modal-basic-inner">
-                                                                            <h3>Add Payment</h3>
-                                                                            <p>Fill In :</p>
-                                                                            <form action="" method="POST">
-                                                                                <div class="form-group-inner">
-                                                                                    <div class="row">
-                                                                                        <div class="col-lg-4">
-                                                                                            <label class="">Name</label>
-                                                                                        </div>
-                                                                                        <div class="col-lg-8">
-                                                                                            <select class="form-control" id="personname" name="personname" required>
-                                                                                                <option value="" selected>Select Client Name</option>
-                                                                                                <?php                                                                            
-                                                                                                $sql = "SELECT name FROM booking_applicant WHERE remark = ''";
-                                                                                                $result = $con->query($sql);
 
-                                                                                                if ($result->num_rows > 0) {
-                                                                                                    while ($row = $result->fetch_assoc()) {
-                                                                                                        echo '<option value="' . $row['name'] . '">' . $row['name'] . '</option>';
-                                                                                                    }
+                                                <div class="modal-content">
+                                                    <div class="modal-close-area modal-close-df">
+                                                        <a class="close" data-dismiss="modal" href="#"><i class="fa fa-close"></i></a>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="modal-login-form-inner">
+                                                            <div class="row">
+                                                                <div class="col-lg-12">
+                                                                    <div class="basic-login-inner modal-basic-inner">
+                                                                        <h3>Add Payment</h3>
+                                                                        <p>Fill In :</p>
+                                                                        <form action="" method="POST">
+                                                                            <div class="form-group-inner">
+                                                                                <div class="row">
+                                                                                    <div class="col-lg-4">
+                                                                                        <label class="">Name</label>
+                                                                                    </div>
+                                                                                    <div class="col-lg-8">
+                                                                                        <select class="form-control" id="personname" name="personname" required>
+                                                                                            <option value="" selected>Select Client Name</option>
+                                                                                            <?php
+                                                                                            $sql = "SELECT name FROM booking_applicant WHERE remark = ''";
+                                                                                            $result = $con->query($sql);
+
+                                                                                            if ($result->num_rows > 0) {
+                                                                                                while ($row = $result->fetch_assoc()) {
+                                                                                                    echo '<option value="' . $row['name'] . '">' . $row['name'] . '</option>';
                                                                                                 }
-                                                                                                ?>
-                                                                                            </select>
-                                                                                        </div>
+                                                                                            }
+                                                                                            ?>
+                                                                                        </select>
                                                                                     </div>
                                                                                 </div>
+                                                                            </div>
 
-                                                                                <div class="form-group-inner">
-                                                                                    <div class="row">
-                                                                                        <div class="col-lg-4">
-                                                                                            <label class="">Service</label>
-                                                                                        </div>
-                                                                                        <div class="col-lg-8">
-                                                                                            <input type="text" class="form-control" placeholder="Service" id="service" name="service" readonly>
-                                                                                        </div>
+                                                                            <div class="form-group-inner">
+                                                                                <div class="row">
+                                                                                    <div class="col-lg-4">
+                                                                                        <label class="">Service</label>
+                                                                                    </div>
+                                                                                    <div class="col-lg-8">
+                                                                                        <input type="text" class="form-control" placeholder="Service" id="service" name="service" readonly>
                                                                                     </div>
                                                                                 </div>
+                                                                            </div>
 
-                                                                                <div class="form-group-inner">
-                                                                                    <div class="row">
-                                                                                        <div class="col-lg-4">
-                                                                                            <label class="">Amount</label>
-                                                                                        </div>
-                                                                                        <div class="col-lg-3">
-                                                                                            <input type="text" class="form-control" placeholder="00.00" id="amount" name="amount" readonly>
-                                                                                        </div>
+                                                                            <div class="form-group-inner">
+                                                                                <div class="row">
+                                                                                    <div class="col-lg-4">
+                                                                                        <label class="">Amount</label>
+                                                                                    </div>
+                                                                                    <div class="col-lg-3">
+                                                                                        <input type="text" class="form-control" placeholder="00.00" id="amount" name="amount" readonly>
                                                                                     </div>
                                                                                 </div>
+                                                                            </div>
 
-                                                                                <div class="form-group-inner">
-                                                                                    <div class="row">
-                                                                                        <div class="col-lg-4">
-                                                                                            <label class="">Official Receipt</label>
-                                                                                        </div>
-                                                                                        <div class="col-lg-8">
-                                                                                            <input type="text" class="form-control" id="official_receipt" name="official_receipt" placeholder="Official Receipt" required>
-                                                                                        </div>
+                                                                            <div class="form-group-inner">
+                                                                                <div class="row">
+                                                                                    <div class="col-lg-4">
+                                                                                        <label class="">Official Receipt</label>
+                                                                                    </div>
+                                                                                    <div class="col-lg-8">
+                                                                                        <input type="text" class="form-control" id="official_receipt" name="official_receipt" placeholder="Official Receipt" required>
                                                                                     </div>
                                                                                 </div>
+                                                                            </div>
 
-                                                                            
 
-                                                                                <div class="modal-footer">
-                                                                                  
-                                                                                    <button type="submit" name="submit" id="submit" class="button">Add</button>
-                                                                                </div>
-                                                                            </form>
 
-                                                                            <?php
-                                                                                if (isset($_POST['submit'])) {
-                                                                                    date_default_timezone_set("Asia/Manila");
-                                                                                    $name = $_POST["personname"];
-                                                                                    $service = $_POST["service"];
-                                                                                    $amount = $_POST["amount"];
-                                                                                    $officialReceipt = $_POST["official_receipt"];
-                                                                                    $dt = date('Y-m-d h:i:s A');
-                                                                                    $remark = "Completed";
+                                                                            <div class="modal-footer">
 
-                                                                                  
-                                                                                    $checkQuery = "SELECT * FROM applicant_payment WHERE official_receipt = '$officialReceipt'";
-                                                                                    $checkResult = $con->query($checkQuery);
+                                                                                <button type="submit" name="submit" id="submit" class="button">Add</button>
+                                                                            </div>
+                                                                        </form>
 
-                                                                                    if ($checkResult->num_rows == 0) {
-                                                                                        $query = "SELECT booking_id FROM booking_applicant WHERE name = '$name'";
-                                                                                        $result = $con->query($query);
+                                                                        <?php
+                                                                        if (isset($_POST['submit'])) {
+                                                                            date_default_timezone_set("Asia/Manila");
+                                                                            $name = $_POST["personname"];
+                                                                            $service = $_POST["service"];
+                                                                            $amount = $_POST["amount"];
+                                                                            $officialReceipt = $_POST["official_receipt"];
+                                                                            $dt = date('Y-m-d h:i:s A');
+                                                                            $remark = "Completed";
 
-                                                                                        if ($result->num_rows > 0) {
-                                                                                            $row = $result->fetch_assoc();
-                                                                                            $bookingId = $row['booking_id'];
 
-                                                                                            $sql = "INSERT INTO applicant_payment (applicant_id, name, official_receipt, service, amount, date_created) 
+                                                                            $checkQuery = "SELECT * FROM applicant_payment WHERE official_receipt = '$officialReceipt'";
+                                                                            $checkResult = $con->query($checkQuery);
+
+                                                                            if ($checkResult->num_rows == 0) {
+                                                                                $query = "SELECT booking_id FROM booking_applicant WHERE name = '$name'";
+                                                                                $result = $con->query($query);
+
+                                                                                if ($result->num_rows > 0) {
+                                                                                    $row = $result->fetch_assoc();
+                                                                                    $bookingId = $row['booking_id'];
+
+                                                                                    $sql = "INSERT INTO applicant_payment (applicant_id, name, official_receipt, service, amount, date_created) 
                                                                                                     VALUES ('$bookingId', '$name', '$officialReceipt', '$service', '$amount', '$dt')";
 
-                                                                                            if ($con->query($sql) === TRUE) {
-                                                                                                
-                                                                                                $updateQuery = "UPDATE booking_applicant SET remark = '$remark' WHERE booking_id = '$bookingId'";
-                                                                                                if ($con->query($updateQuery) === TRUE) {
-                                                                                                    echo "<script>alert('Payment added successfully.');</script>";
-                                                                                                    echo '<script>window.location.href = window.location.pathname;</script>';
-                                                                                                    exit;
-                                                                                                } else {
-                                                                                                    echo "Error updating booking: " . $con->error;
-                                                                                                }
-                                                                                            } else {
-                                                                                                echo "Error inserting payment record: " . $con->error;
-                                                                                            }
+                                                                                    if ($con->query($sql) === TRUE) {
+
+                                                                                        $updateQuery = "UPDATE booking_applicant SET remark = '$remark' WHERE booking_id = '$bookingId'";
+                                                                                        if ($con->query($updateQuery) === TRUE) {
+                                                                                            echo "<script>alert('Payment added successfully.');</script>";
+                                                                                            echo '<script>window.location.href = window.location.pathname;</script>';
+                                                                                            exit;
                                                                                         } else {
-                                                                                            echo "<script>alert('Error: No matching booking found for the selected name.');</script>";
+                                                                                            echo "Error updating booking: " . $con->error;
                                                                                         }
                                                                                     } else {
-                                                                                        echo "<script>alert('Error: Official receipt already exists in the database.');</script>";
+                                                                                        echo "Error inserting payment record: " . $con->error;
                                                                                     }
+                                                                                } else {
+                                                                                    echo "<script>alert('Error: No matching booking found for the selected name.');</script>";
                                                                                 }
-                                                                                ?>
+                                                                            } else {
+                                                                                echo "<script>alert('Error: Official receipt already exists in the database.');</script>";
+                                                                            }
+                                                                        }
+                                                                        ?>
 
 
 
 
-                                                
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div></div>
-                                    
-                                    
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <?php
-                                    $sql = "SELECT * FROM applicant_payment";
-                                    $result = mysqli_query($con, $sql);
 
-                                    if (mysqli_num_rows($result) > 0) {
-                                        echo '<table id="table" data-toggle="table" data-pagination="true" data-search="true"
+                                        <?php
+                                        $sql = "SELECT * FROM applicant_payment";
+                                        $result = mysqli_query($con, $sql);
+
+                                        if (mysqli_num_rows($result) > 0) {
+                                            echo '<table id="table" data-toggle="table" data-pagination="true" data-search="true"
                                             data-show-columns="true" data-show-pagination-switch="false"
                                             data-show-refresh="true" data-key-events="true" data-show-toggle="false"
                                             data-resizable="true" data-cookie="true" data-cookie-id-table="saveId"
@@ -417,128 +397,130 @@ if (!isset($_SESSION['id'])) {
                                                 echo '<td>' . $row['service'] . '</td>';
                                                 echo '<td><i>₱' . $row['amount'] . '</i></td>';
                                                 echo '<td>' . $row['official_receipt'] . '</td>';
-                                            
+
                                                 echo '<td class="datatable-ct">';
                                                 echo '<button class="btn btn-danger btn-xs" onclick="deleteEntry(' . $row['payment_id'] . ')"><i class="fa fa-trash"></i></button>';
                                                 echo '</td>';
-                                            
+
                                                 echo '</tr>';
                                             }
-                                            
 
-                                        echo '</tbody></table>';
-                                    } else {
-                                        echo 'No data found.';
+
+                                            echo '</tbody></table>';
+                                        } else {
+                                            echo 'No data found.';
+                                        }
+
+                                        mysqli_close($con);
+                                        ?>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Static Table End -->
+                        </div>
+                    </div>
+
+
+                    <!-- jquery
+		============================================ -->
+                    <script src="js/vendor/jquery-1.11.3.min.js"></script>
+                    <!-- bootstrap JS
+		============================================ -->
+                    <script src="js/bootstrap.min.js"></script>
+                    <!-- meanmenu JS
+		============================================ -->
+                    <script src="js/jquery.meanmenu.js"></script>
+                    <!-- mCustomScrollbar JS
+		============================================ -->
+                    <script src="js/jquery.mCustomScrollbar.concat.min.js"></script>
+                    <!-- sticky JS
+		============================================ -->
+                    <script src="js/jquery.sticky.js"></script>
+                    <!-- scrollUp JS
+		============================================ -->
+                    <script src="js/jquery.scrollUp.min.js"></script>
+                    <!-- counterup JS
+		============================================ -->
+                    <script src="js/counterup/jquery.counterup.min.js"></script>
+                    <script src="js/counterup/waypoints.min.js"></script>
+                    <!-- peity JS
+		============================================ -->
+                    <script src="js/peity/jquery.peity.min.js"></script>
+                    <script src="js/peity/peity-active.js"></script>
+                    <!-- sparkline JS
+		============================================ -->
+                    <script src="js/sparkline/jquery.sparkline.min.js"></script>
+                    <script src="js/sparkline/sparkline-active.js"></script>
+                    <!-- data table JS
+		============================================ -->
+                    <script src="js/data-table/bootstrap-table.js"></script>
+                    <script src="js/data-table/tableExport.js"></script>
+                    <script src="js/data-table/data-table-active.js"></script>
+                    <script src="js/data-table/bootstrap-table-editable.js"></script>
+                    <script src="js/data-table/bootstrap-editable.js"></script>
+                    <script src="js/data-table/bootstrap-table-resizable.js"></script>
+                    <script src="js/data-table/colResizable-1.5.source.js"></script>
+                    <script src="js/data-table/bootstrap-table-export.js"></script>
+                    <!-- main JS
+		============================================ -->
+                    <script src="js/main.js"></script>
+
+
+                    <script>
+                        $("#personname").on("change", function() {
+                            var personname = $(this).val();
+                            if (personname != '') {
+                                $.ajax({
+                                    type: 'POST',
+                                    url: 'get_service_amount.php',
+                                    data: {
+                                        personname: personname
+                                    },
+                                    success: function(data) {
+                                        var parsedData = JSON.parse(data);
+
+
+                                        var formattedAmount = parseFloat(parsedData.amount).toLocaleString('en-US', {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
+                                        });
+
+                                        $("#service").val(parsedData.service);
+                                        $("#amount").val(formattedAmount); //
+                                    },
+                                    error: function() {
+                                        alert('An error occurred while fetching data.');
                                     }
+                                });
+                            }
+                        });
+                    </script>
+                    <script>
+                        function deleteEntry(paymentId) {
+                            if (confirm("Are you sure you want to delete this payment record?")) {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "delete_payment.php",
+                                    data: {
+                                        delete_payment_id: paymentId
+                                    },
+                                    success: function(response) {
 
-                                    mysqli_close($con);
-                                    ?>
-                                      
-                </div>
-            </div>
-        </div>
-        <!-- Static Table End -->
-    </div>
-    </div>
+                                        alert(response);
 
+                                        if (response.includes("successfully")) {
+                                            location.reload();
+                                        }
 
-    <!-- jquery
-		============================================ -->
-    <script src="js/vendor/jquery-1.11.3.min.js"></script>
-    <!-- bootstrap JS
-		============================================ -->
-    <script src="js/bootstrap.min.js"></script>
-    <!-- meanmenu JS
-		============================================ -->
-    <script src="js/jquery.meanmenu.js"></script>
-    <!-- mCustomScrollbar JS
-		============================================ -->
-    <script src="js/jquery.mCustomScrollbar.concat.min.js"></script>
-    <!-- sticky JS
-		============================================ -->
-    <script src="js/jquery.sticky.js"></script>
-    <!-- scrollUp JS
-		============================================ -->
-    <script src="js/jquery.scrollUp.min.js"></script>
-    <!-- counterup JS
-		============================================ -->
-    <script src="js/counterup/jquery.counterup.min.js"></script>
-    <script src="js/counterup/waypoints.min.js"></script>
-    <!-- peity JS
-		============================================ -->
-    <script src="js/peity/jquery.peity.min.js"></script>
-    <script src="js/peity/peity-active.js"></script>
-    <!-- sparkline JS
-		============================================ -->
-    <script src="js/sparkline/jquery.sparkline.min.js"></script>
-    <script src="js/sparkline/sparkline-active.js"></script>
-    <!-- data table JS
-		============================================ -->
-    <script src="js/data-table/bootstrap-table.js"></script>
-    <script src="js/data-table/tableExport.js"></script>
-    <script src="js/data-table/data-table-active.js"></script>
-    <script src="js/data-table/bootstrap-table-editable.js"></script>
-    <script src="js/data-table/bootstrap-editable.js"></script>
-    <script src="js/data-table/bootstrap-table-resizable.js"></script>
-    <script src="js/data-table/colResizable-1.5.source.js"></script>
-    <script src="js/data-table/bootstrap-table-export.js"></script>
-    <!-- main JS
-		============================================ -->
-    <script src="js/main.js"></script>
-
-   
-    <script>
-    $("#personname").on("change", function() {
-        var personname = $(this).val();
-        if (personname != '') {
-            $.ajax({
-                type: 'POST',
-                url: 'get_service_amount.php',
-                data: {
-                    personname: personname
-                },
-                success: function(data) {
-                    var parsedData = JSON.parse(data);
-                    
-       
-                    var formattedAmount = parseFloat(parsedData.amount).toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-});
-                    
-                    $("#service").val(parsedData.service);
-                    $("#amount").val(formattedAmount); //
-                },
-                error: function() {
-                    alert('An error occurred while fetching data.');
-                }
-            });
-        }
-    });
-</script>
-<script>
-function deleteEntry(paymentId) {
-    if (confirm("Are you sure you want to delete this payment record?")) {
-        $.ajax({
-            type: "POST",
-            url: "delete_payment.php",
-            data: { delete_payment_id: paymentId },
-            success: function(response) {
-    
-                alert(response);
-                
-                if (response.includes("successfully")) {
-                    location.reload();
-                }
-                
-            },
-            error: function() {
-                alert("An error occurred while deleting the payment record.");
-            }
-        });
-    }
-}
-</script>
+                                    },
+                                    error: function() {
+                                        alert("An error occurred while deleting the payment record.");
+                                    }
+                                });
+                            }
+                        }
+                    </script>
 
 
 
