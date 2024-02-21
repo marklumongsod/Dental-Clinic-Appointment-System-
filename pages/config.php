@@ -1,16 +1,78 @@
 <?php
-
 session_start();
 include('../dbconnect.php');
 
 if (!isset($_SESSION['id'])) {
-
     $_SESSION['error_message'] = "You must log in to access this page.";
     header("Location: ../index_admin.php");
     exit();
 }
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"])) {
+  $target_dir = "uploads_qr/"; // Directory where uploaded files will be saved
+  $target_file = $target_dir . basename($_FILES["image"]["name"]); // Full path of the uploaded file
+  $uploadOk = 1;
+  $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
+  // Check if image file is a actual image or fake image
+  if (isset($_POST["submit"])) {
+      $check = getimagesize($_FILES["image"]["tmp_name"]);
+      if ($check !== false) {
+          // echo "File is an image - " . $check["mime"] . ".";
+          $uploadOk = 1;
+      } else {
+          echo "<script>swal('Error', 'File is not an image', 'error');</script>";
+          $uploadOk = 0;
+      }
+  }
+
+  // Check file size
+  if ($_FILES["image"]["size"] > 500000) { // Adjust size limit as needed
+      echo "<script>swal('Error', 'Sorry, your file is too large', 'error');</script>";
+      $uploadOk = 0;
+  }
+
+  // Allow certain file formats
+  if ($imageFileType != "jpg" && $imageFileType != "jpeg" && $imageFileType != "png") {
+      echo "<script>swal('Error', 'Sorry, only JPG, JPEG, and PNG files are allowed', 'error');</script>";
+      $uploadOk = 0;
+  }
+
+  // Check if a file is already uploaded in the database
+  $sql_check = "SELECT * FROM qr_code LIMIT 1";
+  $result_check = mysqli_query($con, $sql_check);
+  if (mysqli_num_rows($result_check) > 0) {
+      // If a file exists, update the existing record in the database
+      $row = mysqli_fetch_assoc($result_check);
+      $attachment_path = mysqli_real_escape_string($con, $target_file);
+      $sql = "UPDATE qr_code SET attachment = '$attachment_path' WHERE id = {$row['id']}";
+      if(mysqli_query($con, $sql)) {
+          $_SESSION['statuss'] = "File updated successfully!";
+          $_SESSION['status_code'] = "success";
+      } else {
+          echo "<script>swal('Error', 'Error updating file', 'error');</script>";
+          $uploadOk = 0;
+      }
+  } else {
+      // If no file exists, move the uploaded file to the target directory and insert its path into the database
+      if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
+          echo "<script>swal('Success', 'The file " . basename($_FILES["image"]["name"]) . " has been uploaded', 'success');</script>";
+
+          // Insert into database
+          $attachment_path = mysqli_real_escape_string($con, $target_file);
+          $sql = "INSERT INTO qr_code (attachment) VALUES ('$attachment_path')";
+          if(mysqli_query($con, $sql)) {
+              echo "<script>swal('Success', 'Record inserted successfully', 'success');</script>";
+          } else {
+              echo "<script>swal('Error', 'Error inserting record', 'error');</script>";
+          }
+      } else {
+          echo "<script>swal('Error', 'Sorry, there was an error uploading your file', 'error');</script>";
+      }
+  }
+}
 ?>
+
+
 <!doctype html>
 <html class="no-js" lang="en">
 
@@ -65,6 +127,7 @@ if (!isset($_SESSION['id'])) {
     <!-- modernizr JS
 		============================================ -->
     <script src="js/vendor/modernizr-2.8.3.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <link rel="icon" type="image/jpg" href="../assets/Ortho.jpg">
     <style>
         .empty-list-item {
@@ -177,11 +240,28 @@ if (!isset($_SESSION['id'])) {
                     </div>
                 </div>
             </div>
+            <?php 
+            if(isset($_SESSION['statuss']))
+                        {
+                            ?>
+                                <script>
+                                    swal({
+                                        title: "<?php echo $_SESSION['statuss']; ?>",
+                                        icon: "<?php echo $_SESSION['status_code']; ?>",
+                                        button: "OK",
+                                    }).then(function() {
+                                        window.location.href = "config.php";
+                                    });
+                                </script> 
+                       <?php 
+                            unset($_SESSION['statuss']);
+                       }
+                    ?>
 
             <h2>Upload QR Code Image</h2>
-            <form action="upload.php" method="post" enctype="multipart/form-data">
+            <form action="" method="post" enctype="multipart/form-data">
                 <label for="image">Select Image:</label>
-                <input type="file" name="image" id="image">
+                <input type="file" name="image" id="image" accept="image/jpeg, image/jpg, image/png">
                 <br><br>
                 <button type="submit" name="submit">Upload Image</button>
             </form>
