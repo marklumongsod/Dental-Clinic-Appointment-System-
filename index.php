@@ -366,6 +366,11 @@ if (isset($_POST['submit'])) {
             };
             ?>
 
+            <h2>For advance appointment</h2>
+            <button class="button" onclick="redirectToExternalForm()">Reservation form</button>
+            <br>
+            <br>
+            <h2>For walk-in's</h2>
             <span>Choose a Date: </span>
             <input type="date" name="date" id="date" class="box" required>
 
@@ -417,7 +422,9 @@ if (isset($_POST['submit'])) {
             <span>Price </span>
             <input type="text" name="price" id="price" placeholder="₱" class="box" readonly>
             <br>
-
+            <!--  <button class="button" onclick="redirectToExternalForm()">Click this to fill up form</button> -->
+            <br>
+            <br>
             <input type="submit" value="Make appointment" name="submit" class="link-btn">
         </form>
     </section>
@@ -459,9 +466,15 @@ if (isset($_POST['submit'])) {
 
     <!--footer section ends-->
 
+    <!--chat button section start-->
 
+    <div id="chat-button" class="chat-button">
+        <a href="link" rel="">
+            <img src="assets/Chatbutton.png" alt="">
+        </a>
+    </div>
 
-
+    <!--chat button section ends-->
 
     <!-- custom js file link -->
     <script src="js/script.js"></script>
@@ -570,35 +583,39 @@ if (isset($_POST['submit'])) {
         });
     </script>
 
-<script>
-  
-    function isThursday(date) {
-      return date.getDay() === 4; 
-    }
-    function initializeDatePicker() {
-      var datePicker = document.getElementById('date');
+    <script>
+        function isThursday(date) {
+            return date.getDay() === 4;
+        }
 
-      datePicker.addEventListener('focus', function() {
-        var currentDate = new Date();
-        var day = currentDate.getDate();
-        var month = currentDate.getMonth() + 1; 
-        var year = currentDate.getFullYear();
-        var today = year + '-' + (month < 10 ? '0' + month : month) + '-' + (day < 10 ? '0' + day : day);
+        function initializeDatePicker() {
+            var datePicker = document.getElementById('date');
 
-        datePicker.setAttribute('min', today); 
+            datePicker.addEventListener('focus', function() {
+                var currentDate = new Date();
+                var day = currentDate.getDate();
+                var month = currentDate.getMonth() + 1;
+                var year = currentDate.getFullYear();
+                var today = year + '-' + (month < 10 ? '0' + month : month) + '-' + (day < 10 ? '0' + day : day);
 
-        datePicker.addEventListener('input', function() {
-          var selectedDate = new Date(datePicker.value);
-          if (isThursday(selectedDate)) {
-            alert('Sorry, Thursdays are unavailable as its the clinics day off. Please choose a different date.');
-            datePicker.value = ''; 
-          }
-        });
-      });
-    }
+                datePicker.setAttribute('min', today);
 
-    initializeDatePicker();
-  </script>
+                datePicker.addEventListener('input', function() {
+                    var selectedDate = new Date(datePicker.value);
+                    if (isThursday(selectedDate)) {
+                        alert('Sorry, Thursdays are unavailable as its the clinics day off. Please choose a different date.');
+                        datePicker.value = '';
+                    }
+                });
+            });
+        }
+
+        initializeDatePicker();
+
+        function redirectToExternalForm() {
+            window.location.href = 'https://docs.google.com/forms/d/e/1FAIpQLScgI7r5-R7cfR8D-GNjq1hb3BoWb4YlMnTMQtsiAvhQH1CAKg/viewform?fbclid=IwAR2hQzzTWueXMR_2YyETjoHGmibiWS-BwxTL61MEZX_mgDhM0AHzLrEMAZ4';
+        }
+    </script>
     <!-- <script>
     checkAvailability();
 </script>
