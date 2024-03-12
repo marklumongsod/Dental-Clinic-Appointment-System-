@@ -5,42 +5,83 @@ $sql = "SELECT * FROM doctors";
 $result = $con->query($sql);
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  $name = $_POST["name"];
-  $contactNumber = $_POST["contactNumber"];
-  $dateOfEmployment = $_POST["dateOfEmployment"];
-  $status = $_POST["status"];
+  if (isset($_POST['edit_id']) && isset($_POST['edit_name']) && isset($_POST['edit_contactNumber']) && isset($_POST['edit_dateOfEmployment']) && isset($_POST['edit_status'])) {
+    // Update existing doctor data
+    $edit_id = $_POST['edit_id'];
+    $edit_name = $_POST['edit_name'];
+    $edit_contactNumber = $_POST['edit_contactNumber'];
+    $edit_dateOfEmployment = $_POST['edit_dateOfEmployment'];
+    $edit_status = $_POST['edit_status'];
 
-  // Check if the full name already exists in the database
-  $existingNameQuery = "SELECT * FROM doctors WHERE full_name = ?";
-  $existingNameStmt = $con->prepare($existingNameQuery);
-  $existingNameStmt->bind_param("s", $name);
-  $existingNameStmt->execute();
-  $existingNameResult = $existingNameStmt->get_result();
-
-  if ($existingNameResult->num_rows > 0) {
-    // Full name already exists in the database
-    $_SESSION['statuss'] = "Error, full name already exists in the database";
-    $_SESSION['status_code'] = "error";
-  } else {
-    // Full name does not exist, proceed with insertion
-    $stmt = $con->prepare("INSERT INTO doctors (full_name, contact_number, status, created_at) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssss", $name, $contactNumber, $status, $dateOfEmployment);
+    $stmt = $con->prepare("UPDATE doctors SET full_name=?, contact_number=?, created_at=?, status=? WHERE id=?");
+    $stmt->bind_param("ssssi", $edit_name, $edit_contactNumber, $edit_dateOfEmployment, $edit_status, $edit_id);
 
     if ($stmt->execute() === TRUE) {
-      $_SESSION['statuss'] = "Doctor added successfully";
+      $_SESSION['statuss'] = "Doctor updated successfully";
       $_SESSION['status_code'] = "success";
     } else {
-      $_SESSION['statuss'] = "Error, adding doctor";
+      $_SESSION['statuss'] = "Error, updating doctor";
       $_SESSION['status_code'] = "error";
     }
 
     $stmt->close();
-  }
+  } elseif (isset($_POST['name']) && isset($_POST['contactNumber']) && isset($_POST['dateOfEmployment']) && isset($_POST['status'])) {
+    // Add a new doctor
+    $name = $_POST["name"];
+    $contactNumber = $_POST["contactNumber"];
+    $dateOfEmployment = $_POST["dateOfEmployment"];
+    $status = $_POST["status"];
 
-  $existingNameStmt->close();
-  $con->close();
+    // Check if the full name already exists in the database
+    $existingNameQuery = "SELECT * FROM doctors WHERE full_name = ?";
+    $existingNameStmt = $con->prepare($existingNameQuery);
+    $existingNameStmt->bind_param("s", $name);
+    $existingNameStmt->execute();
+    $existingNameResult = $existingNameStmt->get_result();
+
+    if ($existingNameResult->num_rows > 0) {
+      // Full name already exists in the database
+      echo "Error, full name already exists in the database";
+    } else {
+      // Full name does not exist, proceed with insertion
+      $stmt = $con->prepare("INSERT INTO doctors (full_name, contact_number, status, created_at) VALUES (?, ?, ?, ?)");
+      $stmt->bind_param("ssss", $name, $contactNumber, $status, $dateOfEmployment);
+
+      if ($stmt->execute() === TRUE) {
+        $_SESSION['statuss'] = "Doctor added successfully";
+        $_SESSION['status_code'] = "success";
+      } else {
+        $_SESSION['statuss'] = "Error, adding doctor";
+        $_SESSION['status_code'] = "error";
+      }
+
+      $stmt->close();
+    }
+
+    $existingNameStmt->close();
+  } else {
+    echo "All fields are required";
+  }
+}
+
+$con->close();
+if (isset($_POST['edit'])) {
+
+  $bookingId = $_POST['doctorId'];
+
+  $query = "SELECT * FROM doctors WHERE id = '$bookingId'";
+  $result = mysqli_query($con, $query);
+
+
+  while ($row = mysqli_fetch_assoc($result)) {
+
+    $name = $row['full_name'];
+    $contact_number = $row['contact_number'];
+    $status = $row['status'];
+  }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -86,13 +127,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
     }
 
-    /* Style the dropdown when it's focused */
     .form-control:focus {
       color: #495057;
       background-color: #fff;
       border-color: #80bdff;
       outline: 0;
       box-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25);
+    }
+
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #000000;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #fa0000;
+      text-decoration: none;
     }
   </style>
 </head>
@@ -141,14 +197,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <span class="nav-link-text ms-1">Inventory</span>
           </a>
         </li>
-        <li class="nav-item">
+        <!-- <li class="nav-item">
           <a class="nav-link text-white " href="../pages1/transaction_history.php">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
               <i class="material-icons opacity-10">notifications</i>
             </div>
             <span class="nav-link-text ms-1">Transaction History</span>
           </a>
-        </li>
+        </li> -->
         <li class="nav-item mt-3">
           <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Configuration Page</h6>
         </li>
@@ -341,16 +397,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
               </div>
               <div class="row justify-content-end">
                 <div class="col-auto"><br>
-                  <button type="submit" class="btn bg-gradient-dark mb-0">
+                  <button type="submit" class="btn btn-primary">
                     <i class="material-icons text-sm">save</i>&nbsp;&nbsp;Add Doctor
                   </button>
                 </div>
               </div>
             </form>
           </div>
-
-          <br>
-
         </div>
 
       </div>
@@ -408,71 +461,64 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                       echo "<span class='text-secondary text-xs font-weight-bold'>" . $row['created_at'] . "</span>";
                       echo "</td>";
                       echo "<td class='align-middle'>";
-                      echo "<button class='badge badge-sm bg-gradient-warning' id='myBtn1'>Edit</button>";
+                      echo '<button class="btn btn-primary update-btn" id="myBtn_' . $row['id'] . '" data-id="' . $row['id'] . '">Edit</button>';
                       echo "</td>";
                       echo "</tr>";
                     }
                   } else {
                     echo "0 results";
                   }
-                  // $con->close();
                   ?>
                 </tbody>
               </table>
-              <!-- The Modal -->
-              <div id="myModal1" class="modal">
-
-                <!-- Modal content -->
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <span class="close">&times;</span>
-                    <h3>Edit Information</h3>
-                  </div>
-                  <div class="modal-body">
-                    <!-- Dropdown field -->
-                    <div class="form-group">
-                      <label for="name">Name:</label>
-                      <input type="text" class="form-control" id="name" placeholder="Enter name">
-                    </div>
-                    <div class="form-group">
-                      <label for="contactNumber">Contact Number:</label>
-                      <input type="text" class="form-control" id="contactNumber" placeholder="Enter contact number">
-                    </div>
-                    <div class="form-group">
-                      <label for="dateOfEmployment">Date of Employment:</label>
-                      <input type="date" class="form-control" id="dateOfEmployment">
-                    </div>
-                    <div class="form-group">
-                      <label for="status">Status:</label>
-                      <select class="form-control" id="status">
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                      </select>
-                    </div>
-
-                    <!-- <p>Some text in the Modal Body</p> -->
-                    <!-- <p>Some other text...</p> -->
-                    <br>
-                    <div class="row justify-content-end">
-                      <div class="col-auto">
-                        <a class="btn bg-gradient-dark mb-0" href="javascript:;" onclick="saveTask()">
-                          <i class="material-icons text-sm">save</i>&nbsp;&nbsp;Save
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-
-                  <br>
-
-                </div>
-
-              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </main>
+
+  <!-- The Modal -->
+  <div id="edit_myModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="close">&times;</span>
+        <h3>Edit Doctor</h3>
+      </div>
+      <div class="modal-body">
+        <form id="editForm" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+          <input type="hidden" id="edit_id" name="edit_id">
+          <div class="form-group">
+            <label for="edit_name">Full Name:</label>
+            <input type="text" class="form-control" id="edit_name" name="edit_name" placeholder="Enter name" required>
+          </div>
+          <div class="form-group">
+            <label for="edit_contactNumber">Contact Number:</label>
+            <input type="number" class="form-control" id="edit_contactNumber" name="edit_contactNumber" placeholder="Enter contact number" required>
+          </div>
+          <div class="form-group">
+            <label for="edit_dateOfEmployment">Date of Employment:</label>
+            <input type="date" class="form-control" id="edit_dateOfEmployment" name="edit_dateOfEmployment" required>
+          </div>
+          <div class="form-group">
+            <label for="edit_status">Status:</label>
+            <select class="form-control" id="edit_status" name="edit_status" required>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="row justify-content-end">
+            <div class="col-auto"><br>
+              <button type="submit" class="btn btn-primary">
+                <i class="material-icons text-sm">save</i>&nbsp;&nbsp;Save Changes
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <div class="fixed-plugin">
     <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
       <i class="material-icons py-2">settings</i>
@@ -561,56 +607,105 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   </script>
 
   <script>
-    var modal = document.getElementById("add_myModal");
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add Doctor Modal
+      var addModal = document.getElementById("add_myModal");
+      var addBtn = document.getElementById("add_myBtn");
+      var addSpan = addModal.getElementsByClassName("close")[0];
 
-
-    var btn = document.getElementById("add_myBtn");
-
-
-    var span = document.getElementsByClassName("close")[0];
-
-
-    btn.onclick = function() {
-      modal.style.display = "block";
-    }
-    span.onclick = function() {
-      modal.style.display = "none";
-    }
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
+      addBtn.onclick = function() {
+        addModal.style.display = "block";
       }
-    }
+
+      addSpan.onclick = function() {
+        addModal.style.display = "none";
+      }
+
+      window.onclick = function(event) {
+        if (event.target == addModal) {
+          addModal.style.display = "none";
+        }
+      }
+    });
   </script>
+  <!-- <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Update Status Modal
+    var updateButtons = document.querySelectorAll('.update-btn');
+    var updateModal = document.getElementById("myModal");
+    var updateSpan = updateModal.getElementsByClassName("close")[0];
 
-  <!-- 
-  <script>
-    // Get the modal
-    var modal = document.getElementById("myModal1");
+    updateButtons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        var doctorId = this.getAttribute('data-id');
+        console.log('Doctor ID:', doctorId);
+        updateModal.style.display = "block";
+      });
+    });
 
-    // Get the button that opens the modal
-    var btn = document.getElementById("myBtn1");
-
-    // Get the <span> element that closes the modal
-    var span = document.getElementsByClassName("close")[0];
-
-    // When the user clicks the button, open the modal 
-    btn.onclick = function() {
-      modal.style.display = "block";
+    updateSpan.onclick = function() {
+      updateModal.style.display = "none";
     }
 
-    // When the user clicks on <span> (x), close the modal
-    span.onclick = function() {
-      modal.style.display = "none";
-    }
-
-    // When the user clicks anywhere outside of the modal, close it
     window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
+      if (event.target == updateModal) {
+        updateModal.style.display = "none";
       }
     }
-  </script> -->
+
+    document.getElementById('doctor_id').value = doctorId;
+  });
+</script> -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Edit Doctor Modal
+      var editModal = document.getElementById("edit_myModal"); // Corrected modal ID
+      var editSpan = editModal.getElementsByClassName("close")[0];
+      var editForm = document.getElementById("editForm");
+
+      // Function to fetch doctor data via AJAX
+      function fetchDoctorData(id) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "fetch_doctor_data.php?id=" + id, true);
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+            var data = JSON.parse(xhr.responseText);
+            populateEditForm(data);
+          }
+        };
+        xhr.send();
+      }
+
+      // Populate edit form fields with fetched data
+      function populateEditForm(data) {
+        document.getElementById("edit_id").value = data.id;
+        document.getElementById("edit_name").value = data.full_name;
+        document.getElementById("edit_contactNumber").value = data.contact_number;
+        document.getElementById("edit_dateOfEmployment").value = data.created_at;
+        document.getElementById("edit_status").value = data.status;
+      }
+
+      // Edit button click event
+      var editBtns = document.querySelectorAll(".update-btn");
+      editBtns.forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          var id = this.getAttribute("data-id");
+          fetchDoctorData(id);
+          editModal.style.display = "block";
+        });
+      });
+
+      editSpan.onclick = function() {
+        editModal.style.display = "none";
+      }
+
+      window.onclick = function(event) {
+        if (event.target == editModal) {
+          editModal.style.display = "none";
+        }
+      }
+    });
+  </script>
 </body>
 
 </html>

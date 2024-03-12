@@ -28,6 +28,23 @@ include('../dbconnect.php');
   <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
   <link href="../assets/css1/modal.content.css" rel="stylesheet" />
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+  <style>
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #000000;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #fa0000;
+      text-decoration: none;
+    }
+  </style>
 </head>
 
 <body class="g-sidenav-show  bg-gray-200">
@@ -74,14 +91,14 @@ include('../dbconnect.php');
             <span class="nav-link-text ms-1">Inventory</span>
           </a>
         </li>
-        <li class="nav-item">
+        <!-- <li class="nav-item">
           <a class="nav-link text-white " href="../pages1/transaction_history.php">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
               <i class="material-icons opacity-10">notifications</i>
             </div>
             <span class="nav-link-text ms-1">Transaction History</span>
           </a>
-        </li>
+        </li> -->
         <li class="nav-item mt-3">
           <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Configuration Page</h6>
         </li>
@@ -277,33 +294,33 @@ include('../dbconnect.php');
 
               <div id="view_myModal" class="modal">
 
-              <!-- Modal content -->
-              <div class="modal-content">
-                <div class="modal-header">
-                  <span class="close">&times;</span>
-                  <h3>View History</h3>
-                </div>
-                <div class="modal-body">
-                <?php
-           
+                <!-- Modal content -->
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <span class="close">&times;</span>
+                    <h3>View History</h3>
+                  </div>
+                  <div class="modal-body">
+                    <?php
 
-                if (isset($_POST['booking_id'])) {
-                    $bookingId = $_POST['booking_id'];
 
-                    $sql = "SELECT name FROM booking_applicant WHERE booking_id = $bookingId";
-                    $result = mysqli_query($con, $sql);
+                    if (isset($_POST['booking_id'])) {
+                      $bookingId = $_POST['booking_id'];
 
-                    if ($result) {
+                      $sql = "SELECT name FROM booking_applicant WHERE booking_id = $bookingId";
+                      $result = mysqli_query($con, $sql);
+
+                      if ($result) {
                         if (mysqli_num_rows($result) > 0) {
-                            $row = mysqli_fetch_assoc($result);
-                            $name = $row['name'];
+                          $row = mysqli_fetch_assoc($result);
+                          $name = $row['name'];
 
-                            $sql = "SELECT * FROM booking_applicant WHERE name = '$name'";
-                            $result = mysqli_query($con, $sql);
+                          $sql = "SELECT * FROM booking_applicant WHERE name = '$name'";
+                          $result = mysqli_query($con, $sql);
 
-                            if ($result) {
-                                if (mysqli_num_rows($result) > 0) {
-                                    $output = '<table style="width: 100%; border-collapse: collapse;">
+                          if ($result) {
+                            if (mysqli_num_rows($result) > 0) {
+                              $output = '<table style="width: 100%; border-collapse: collapse;">
                                     <thead>
                                         <tr>
                                             <th style="padding: 8px 12px; text-align: left; border: 1px solid #ddd; background-color: #f2f2f2; font-weight: bold;">Date and Time of Appointment</th>
@@ -315,46 +332,46 @@ include('../dbconnect.php');
                                     </thead>
                                     <tbody>';
 
-                                    while ($row = mysqli_fetch_assoc($result)) {
-                                        $appointmentDate = date('F j, Y g:i A', strtotime($row['appointment_date'])); 
-                                        $output .= '<tr>';
-                                        $output .= '<td style="padding: 8px 12px; text-align: left; border: 1px solid #ddd;">' . $appointmentDate . '</td>';
-                                        $output .= '<td style="padding: 8px 12px; text-align: left; border: 1px solid #ddd;">' . $row['appointment_code'] . '</td>';
-                                        $output .= '<td style="padding: 8px 12px; text-align: left; border: 1px solid #ddd;">' . $row['name'] . '</td>';
-                                        $output .= '<td style="padding: 8px 12px; text-align: left; border: 1px solid #ddd;">' . $row['service'] . '</td>';
-                                        $output .= '<td style="padding: 8px 12px; text-align: left; border: 1px solid #ddd;">' . $row['remark'] . '</td>';
-                                        $output .= '</tr>';
-                                    }                    
+                              while ($row = mysqli_fetch_assoc($result)) {
+                                $appointmentDate = date('F j, Y g:i A', strtotime($row['appointment_date']));
+                                $output .= '<tr>';
+                                $output .= '<td style="padding: 8px 12px; text-align: left; border: 1px solid #ddd;">' . $appointmentDate . '</td>';
+                                $output .= '<td style="padding: 8px 12px; text-align: left; border: 1px solid #ddd;">' . $row['appointment_code'] . '</td>';
+                                $output .= '<td style="padding: 8px 12px; text-align: left; border: 1px solid #ddd;">' . $row['name'] . '</td>';
+                                $output .= '<td style="padding: 8px 12px; text-align: left; border: 1px solid #ddd;">' . $row['service'] . '</td>';
+                                $output .= '<td style="padding: 8px 12px; text-align: left; border: 1px solid #ddd;">' . $row['remark'] . '</td>';
+                                $output .= '</tr>';
+                              }
 
-                                $output .= '</tbody>
+                              $output .= '</tbody>
                                 </table>';
 
-                                    
 
-                                    echo $output;
-                                } else {
-                                    echo 'No booking history found for this name.';
-                                }
+
+                              echo $output;
                             } else {
-                                echo 'Error in executing the query: ' . mysqli_error($con);
+                              echo 'No booking history found for this name.';
                             }
+                          } else {
+                            echo 'Error in executing the query: ' . mysqli_error($con);
+                          }
                         } else {
-                            echo 'No name found for this booking ID.';
+                          echo 'No name found for this booking ID.';
                         }
-                    } else {
+                      } else {
                         echo 'Error in executing the query: ' . mysqli_error($con);
+                      }
+                    } else {
+                      echo 'Invalid request.';
                     }
-                } else {
-                    echo 'Invalid request.';
-                }
-                ?>
+                    ?>
+                  </div>
+
+                  <br>
+
                 </div>
 
-                <br>
-
               </div>
-
-            </div>
             </div>
           </div>
         </div>
@@ -455,61 +472,37 @@ include('../dbconnect.php');
       });
     });
   </script>
-  <!-- <script>
-
-  var modal = document.getElementById("view_myModal");
-
-
-  var btn = document.getElementById("view_myBtn");
-
-
-  var span = document.getElementsByClassName("close")[0];
-
-
-  btn.onclick = function() {
-    modal.style.display = "block";
-  }
-  span.onclick = function() {
-    modal.style.display = "none";
-  }
-  window.onclick = function(event) {
-    if (event.target == modal) {
-      modal.style.display = "none";
-    }
-  }
-  </script> -->
-
   <script>
-  var modal = document.getElementById("view_myModal");
-  var btns = document.querySelectorAll(".view-history-btn");
-  var span = document.getElementsByClassName("close")[0];
+    var modal = document.getElementById("view_myModal");
+    var btns = document.querySelectorAll(".view-history-btn");
+    var span = document.getElementsByClassName("close")[0];
 
-  btns.forEach(function(btn) {
-    btn.onclick = function() {
-      var bookingId = this.getAttribute("data-booking_id");
-      var xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          document.getElementsByClassName("modal-body")[0].innerHTML = this.responseText;
-          modal.style.display = "block";
-        }
+    btns.forEach(function(btn) {
+      btn.onclick = function() {
+        var bookingId = this.getAttribute("data-booking_id");
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            document.getElementsByClassName("modal-body")[0].innerHTML = this.responseText;
+            modal.style.display = "block";
+          }
+        };
+        xhttp.open("POST", "get_booking_history.php", true);
+        xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhttp.send("booking_id=" + bookingId);
       };
-      xhttp.open("POST", "get_booking_history.php", true);
-      xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-      xhttp.send("booking_id=" + bookingId);
-    };
-  });
+    });
 
-  span.onclick = function() {
-    modal.style.display = "none";
-  };
-
-  window.onclick = function(event) {
-    if (event.target == modal) {
+    span.onclick = function() {
       modal.style.display = "none";
-    }
-  };
-</script>
+    };
+
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    };
+  </script>
 
 </body>
 

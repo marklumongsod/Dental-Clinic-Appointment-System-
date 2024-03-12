@@ -1,80 +1,17 @@
-/* .modal-content { */
-/* background-color: #cbedcb; */
-/* margin: 50% auto 15% auto; /~ 5% from the top, 15% from the bottom and centered ~/ */
-/* border: 1px solid #88888800; */
-/* width: 60%; /~ Could be more or less, depending on screen size ~/ */
-/* border-radius: 5px; */
-/* place-items: center; */
-/* } */
-/* .modal { */
-/* color: black; */
-/* } */
-/* .modal-dialog { */
-/* margin: 50; */
-/* } */
-/* .animate { */
-/* animation: modal-show 0.3s ease-out forwards; */
-/* transform: translateY(-50%); */
-/* opacity: 0; */
-/* } */
-/*  */
-/* @keyframes modal-show { */
-/* from { */
-/* transform: translateY(-100%); */
-/* opacity: 0; */
-/* } */
-/* to { */
-/* transform: translateY(-50%); */
-/* opacity: 1; */
-/* } */
-/* } */
-/* .modal-title { */
-/* font-size: 24px; */
-/* font-weight: bold; */
-/* margin: 0; */
-/* } */
-/*  */
-/* .modal-header { */
-/* display: flex; */
-/* align-items: center; */
-/* justify-content: space-between; */
-/* padding: 10px 15px; */
-/* border-bottom: 1px solid #ccc; */
-/* } */
-/*  */
-/* .modal-title { */
-/* font-size: 24px; */
-/* font-weight: bold; */
-/* margin: 0; */
-/* } */
-/*  */
-/* .modal-body { */
-/* padding: 20px; */
-/* font-size: 16px; */
-/* } */
-/*  */
-/* .modal-footer { */
-/* display: flex; */
-/* align-items: center; */
-/* justify-content: flex-end; */
-/* padding: 10px 15px; */
-/* border-top: 1px solid #ccc; */
-/* } */
-
 
 /* The Modal (background) */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
-    padding-top: 100px; /* Location of the box */
+    display: none; 
+    position: fixed; 
+    z-index: 1;
+    padding-top: 100px; 
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgb(0,0,0); /* Fallback color */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgb(0,0,0); 
+    background-color: rgba(0,0,0,0.4); 
   }
   
   /* Modal Content */
@@ -132,3 +69,4 @@
     /* background-color: #b61e4c; */
     color: white;
   }
+
