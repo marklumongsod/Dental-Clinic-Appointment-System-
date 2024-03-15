@@ -20,7 +20,7 @@ if (isset($_POST['submit'])) {
     $time = $_POST["time"];
     $price = $_POST["price"];
     $dt = date('Y-m-d h:i:s A');
-    $remark = '';
+    $remark = 'Pending';
 
     $randomNumber = str_pad(mt_rand(0, 99999), 10, '0', STR_PAD_LEFT);
 
@@ -34,8 +34,8 @@ if (isset($_POST['submit'])) {
         $message = "The selected date and time are not available.";
     } else {
 
-        $sql = "INSERT INTO booking_applicant (appointment_code, name, email, phone_number, service, price, appointment_date, appointment_time, remark, date_created)
-                VALUES ('$appointmentCode', '$name', '$email', '$phone', '$service', '$price', '$date', '$time', '$remark', '$dt')";
+        $sql = "INSERT INTO booking_applicant (appointment_code, name, email, phone_number, service, price, appointment_date, appointment_time, doctor_assigned, remark, date_created)
+                VALUES ('$appointmentCode', '$name', '$email', '$phone', '$service', '$price', '$date', '$time', ' ', '$remark', '$dt')";
 
         if ($con->query($sql) === TRUE) {
             $message = "Appointment booked successfully.";
@@ -83,7 +83,6 @@ if (isset($_POST['submit'])) {
 
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -109,6 +108,414 @@ if (isset($_POST['submit'])) {
         .error {
             border: 1px solid red;
         }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+:root{
+    --blue: #00b8b8;
+    --black: #333;
+    --white: #fff;
+    --light-color: #666;
+    --light: #eee;
+    --maroon:#9A1E1E;
+    --yellow:#FBCD17;
+    --light-color-hover:#c13636;
+    --light-background:#E8E8E8;
+    --border: .2rem solid rgba(0,0,0,.1);
+    --box-shadow: 0 .5rem 1rem rgba(0,0,0,.1);
+}
+
+*{
+    font-family: 'Poppins', 'sans-serif';
+    margin: 0; 
+    padding: 0;
+    box-sizing: border-box;
+    outline: none;
+    border: none;
+    text-decoration: none !important;
+    text-transform: capitalize;
+}
+
+*::-webkit-scrollbar{
+    height: .5rem;
+    width: 1rem;
+}
+
+*::-webkit-scrollbar-track{
+    background-color: transparent;
+}
+
+*::-webkit-scrollbar-thumb{
+    background-color: var(--maroon);
+}
+
+html{
+    font-size: 62.5%;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    scroll-padding-top: 6.5rem;
+}
+
+section{
+ padding: 7rem 2rem;
+}
+
+.heading{
+    text-align: center;
+    font-size: 4rem;
+    color: var(--black);
+    text-transform: uppercase;
+    font-weight: bolder;
+    margin-bottom: 3rem;
+}
+
+.link-btn{
+    display:inline-block;
+    padding:1rem 2rem;
+    border-radius: .5rem;
+    background-color: var(--maroon);
+    cursor: pointer;
+    font-size: 1.4rem;
+    color: var(--white);
+}
+
+.link-btn:hover{
+    background-color: var(--light-color-hover);
+    color: var(--white);
+}
+
+.header{
+    padding: 2rem;
+    border-bottom: var(--border);
+}
+
+.header.active{
+    background-color: var(--white);
+    box-shadow: var(--box-shadow);
+    border: 0;
+}
+
+
+.header .logo{
+    font-size: 2rem;
+    color: var(--black);
+}
+
+.header .logo span{
+    color: var(--maroon);
+}
+
+.header .nav a{
+    margin: 0 1rem;
+    font-size: 1.4rem;
+    color: var(--black);
+}
+
+.header .nav a:hover{
+    color: var(--maroon);
+}
+
+#menu-btn{
+    font-size: 2.5rem;
+    color: var(--black);
+    cursor: pointer;
+    margin-left: 20rem;
+    display: none;
+}
+
+.home{
+    background: url() no-repeat;
+    background-size: conver;
+    background-position: center;
+}
+
+.home .content{
+    width: 60rem;
+    padding: 2rem;
+}
+
+.home .content h3{
+    font-size: 4rem;
+    text-transform: uppercase;
+    color: var(--maroon)
+}
+
+.home .content p{
+    line-height: 2;
+    font-size: 1.5rem;
+    color: var(--light-color);
+    padding: 1rem 0;
+}
+
+.about .row{
+    min-height: 50vh;
+}
+
+.about .content span{
+    font-size: 2rem;
+    color: var(--maroon);
+}
+
+.about .content h3{
+    font-size: 3rem;
+    color: var(--black);
+    margin-top: 1rem;
+}
+
+.about .content p{
+    padding: 1rem 0;
+    font-size: 1.4rem;
+    color: var(--light-color);
+    line-height: 2;
+}
+
+.services{
+    background-color: var(--white);
+}
+
+.services .box-container{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
+    gap: 2rem;
+}
+
+.services .box-container .box{
+    text-align: center;
+    padding: 2rem;
+    background-color: var(--white);
+    box-shadow: var(--box-shadow);
+    border-radius: .5rem;
+}
+
+.services .box-container .box img{
+    margin: 1rem, 0;
+    height: 4rem;
+}
+
+.services .box-container .box h3{
+    font-size: 2rem;
+    padding: 1rem, 0;
+    color: var(--maroon);
+}
+
+.services .box-container .box p{
+    font-size: 1.5rem;
+    color: var(--light-color);
+    line-height: 2;
+}
+
+
+.process .box-container{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
+    gap: 2rem;
+}
+
+.process .box-container .box{ 
+    background-color: var(--white);
+    padding: 2rem;
+    border-radius: .5rem;
+    text-align: center;
+    box-shadow: var(--box-shadow);
+}
+
+.process .box-container .box img{
+    height: 20rem;
+    margin: 1rem 0;
+}
+
+.process .box-container h3{
+    font-size: 2rem;
+    color: var(--maroon);
+    margin: 1.5rem 0;
+}
+
+.process .box-container p{
+    font-size: 1.5rem;
+    color: var(--black);
+    line-height: 2;
+}
+
+.contact form .message{
+    margin-bottom: 2rem;
+    border-radius: .5rem;
+    background-color: var(--maroon);
+    padding: 1.2rem 1rem;
+    font-size: 1.7rem;
+    color: var(--white);
+    text-align: center;
+}
+
+.contact form{
+    border-radius: .3rem;
+    background-color: var(--light-background);
+    padding: 2rem;
+    margin: 0 auto;
+    max-width: 50rem;
+}
+
+.contact form .box{
+    width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    border-radius: .3rem;
+    background-color: var(--white);
+    padding: 1.2rem 1.4rem;
+    font-size: 1.7rem;
+    color: var(--black);
+    text-transform: none;
+}
+
+.contact form span{
+    font-size: 1.5rem;
+    color: var(--black);
+}
+
+#contact form button {
+    background-color: var(--yellow);
+    border: none;
+    color: var(--white);
+    padding: 10px 25px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.footer .box-container{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(25rem, 1fr));
+    gap: 3rem;
+}
+
+.footer .box-container .box{
+    text-align: center;
+}
+
+.footer .box-container .box{
+    height: 4rem;
+    width: 4rem;
+    border-radius: 50%;
+    line-height: 4rem;
+    font-size: 1rem;
+    background-color: var(--maroon);
+    color: var(--white);
+    margin-bottom: 1rem;
+}
+
+.footer .box-container .box h3{
+    font-size: 2rem;
+    margin: 2rem 0;
+    color: var(--black);
+}
+
+.footer .box-container .box p{
+    font-size: 1.5rem;
+    color: var(--light-color);
+    text-transform: none;
+    line-height: 1.5rem;
+}
+
+ /* Chat Button Styles */
+ #chat-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;  
+}
+
+#chat-button img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease; 
+}
+
+#chat-button img:hover {
+    transform: scale(1.1);
+}
+
+
+/* media queries */
+
+@media (max-width:991px){
+    
+    html{
+        font-size: 51%;
+    }
+
+    .header .link-btn{
+       display: none;
+    }
+}
+
+section{
+    padding: 5rem 2rem;
+   }
+
+   @media (max-width:768px){
+
+    section{
+        padding: 3rem 1rem;
+       }
+
+    #menu-btn{
+        display: inline-block;
+        transition: .2s linear;
+    }
+
+    #menu-btn.fa-times{
+        transform: rotate(180deg);
+    }
+
+    .header .nav{
+        position: absolute;
+        top: 99%; left: 0; right: 0;
+        background-color: var(--white);
+        border-top: var(--border);
+        border-bottom: var(--border);
+        padding: 1rem 0;
+        text-align: center;
+        flex-flow: column;
+        clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+        transition: .2s linear;
+    }
+
+    .header .nav.active{
+        clip-path: polygon(0 0, 100% 0 , 100% 100%, 0 100%);
+    }
+
+    .header .nav a{
+        margin: 1rem 0;
+        font-size: 2rem;
+    }
+
+    .home{
+        background-position: left;
+    }
+
+    .home .content{
+        width: auto;
+    }
+}
+
+@media (max-width:450px){
+    
+    html{
+        font-size: 50%;
+    }
+
+    .home .content h3{
+        font-size: 4rem;
+    }
+
+    .heading{
+        font-size: 3rem;
+    }
+}
     </style>
 </head>
 
@@ -469,8 +876,8 @@ if (isset($_POST['submit'])) {
     <!--chat button section start-->
 
     <div id="chat-button" class="chat-button">
-        <a href="link" rel="">
-            <img src="assets/Chatbutton.png" alt="">
+        <a href="https://www.facebook.com/profile.php?id=61556183581985" target="_blank">
+            <img src="assets/Ortho.png" alt="Ortho" />
         </a>
     </div>
 
@@ -616,40 +1023,6 @@ if (isset($_POST['submit'])) {
             window.location.href = 'https://docs.google.com/forms/d/e/1FAIpQLScgI7r5-R7cfR8D-GNjq1hb3BoWb4YlMnTMQtsiAvhQH1CAKg/viewform?fbclid=IwAR2hQzzTWueXMR_2YyETjoHGmibiWS-BwxTL61MEZX_mgDhM0AHzLrEMAZ4';
         }
     </script>
-    <!-- <script>
-    checkAvailability();
-</script>
-
-    <script>
-        function checkAvailability() {
-            var selectedTime = document.querySelector('input[name="time"]:checked').value;
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "check_availability.php", true);
-            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    console.log(xhr.responseText); 
-                    if (xhr.responseText === "available") {
-                     
-                        document.querySelectorAll('form input:not([name="date"]), form select').forEach(function (element) {
-                            element.removeAttribute('disabled');
-                        });
-                    } else {
-                      
-                        document.querySelectorAll('form input:not([name="date"]), form select').forEach(function (element) {
-                            element.setAttribute('disabled', 'disabled');
-                        });
-                    }
-                }
-            };
-
-            var data = "date=" + encodeURIComponent(document.getElementById("date").value) +
-                "&time=" + encodeURIComponent(selectedTime);
-
-            xhr.send(data);
-        }
-    </script> -->
 
 </body>
 

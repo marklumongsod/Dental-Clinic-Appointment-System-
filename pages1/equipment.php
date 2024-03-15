@@ -9,75 +9,140 @@ if (!isset($_SESSION['id'])) {
   exit();
 }
 
-$sql = "SELECT * FROM doctors";
+$sql = "SELECT * FROM equipment";
 $result = $con->query($sql);
 
+date_default_timezone_set('Asia/Manila');
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  if (isset($_POST['edit_id']) && isset($_POST['edit_name']) && isset($_POST['edit_contactNumber']) && isset($_POST['edit_dateOfEmployment']) && isset($_POST['edit_status'])) {
+    if (isset($_POST['add_submit'])) {
+        $equipment_name = $_POST["equipment_name"];
+        $quantity = $_POST["quantity"];
+        $current_datetime = date('Y-m-d H:i:s');
 
-    // Update existing doctor data
-    $edit_id = $_POST['edit_id'];
-    $edit_name = $_POST['edit_name'];
-    $edit_contactNumber = $_POST['edit_contactNumber'];
-    $edit_dateOfEmployment = $_POST['edit_dateOfEmployment'];
-    $edit_status = $_POST['edit_status'];
+        // File upload configuration
+        $targetDir = "upload/equipments"; 
+        $fileName = basename($_FILES["image"]["name"]);
+        $targetFilePath = $targetDir . $fileName;
+        $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
 
-    $stmt = $con->prepare("UPDATE doctors SET full_name=?, contact_number=?, created_at=?, status=? WHERE id=?");
-    $stmt->bind_param("ssssi", $edit_name, $edit_contactNumber, $edit_dateOfEmployment, $edit_status, $edit_id);
+     
+        $allowTypes = array('jpg', 'png', 'jpeg', 'gif');
 
-    if ($stmt->execute() === TRUE) {
-      $_SESSION['statuss'] = "Doctor updated successfully";
-      $_SESSION['status_code'] = "success";
+        if (in_array($fileType, $allowTypes)) {
+  
+            if (getimagesize($_FILES["image"]["tmp_name"])) {
+
+                // Upload file to the folder
+                if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFilePath)) {
+               
+                    $stmt = $con->prepare("INSERT INTO equipment (equipment_name, quantity, image, created_at) VALUES (?, ?, ?, ?)");
+                    $stmt->bind_param("siss", $equipment_name, $quantity, $targetFilePath, $current_datetime);
+
+                    if ($stmt->execute() === TRUE) {
+                        $_SESSION['statuss'] = "Equipment added successfully";
+                        $_SESSION['status_code'] = "success";
+                    } else {
+                        $_SESSION['statuss'] = "Error, adding equipment";
+                        $_SESSION['status_code'] = "error";
+                    }
+
+                    $stmt->close();
+                } else {
+                    $_SESSION['statuss'] = "Error uploading image";
+                    $_SESSION['status_code'] = "error";
+                }
+            } else {
+                $_SESSION['statuss'] = "Invalid image file";
+                $_SESSION['status_code'] = "error";
+            }
+        }
+    } elseif (isset($_POST['edit_submit'])) {
+        $edit_id = $_POST['edit_id'];
+        $edit_equipment_name = $_POST['edit_equipment_name'];
+        $edit_quantity = $_POST['edit_quantity'];
+        // $edit_expiration_date = $_POST['edit_expiration_date'];
+  
+    
+  
+        if (!empty($_FILES["edit_image"]["name"])) {
+            $targetDir = "upload/equipments"; 
+            $fileName = basename($_FILES["edit_image"]["name"]);
+            $targetFilePath = $targetDir . $fileName;
+            $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+    
+ 
+            $allowTypes = array('jpg', 'png', 'jpeg', 'gif');
+    
+            if (in_array($fileType, $allowTypes)) {
+                if (getimagesize($_FILES["edit_image"]["tmp_name"])) {
+                    if (!move_uploaded_file($_FILES["edit_image"]["tmp_name"], $targetFilePath)) {
+                        $_SESSION['statuss'] = "Error uploading image";
+                        $_SESSION['status_code'] = "error";
+                        exit; 
+                    }
+                } else {
+                    $_SESSION['statuss'] = "Invalid image file";
+                    $_SESSION['status_code'] = "error";
+                    exit; 
+                }
+            } else {
+                $_SESSION['statuss'] = "Invalid file type. Allowed file types: jpg, png, jpeg, gif";
+                $_SESSION['status_code'] = "error";
+                exit; 
+            }
+            $edit_image = $targetFilePath;
+        } else {
+              // remain existing image
+              $stmt = $con->prepare("SELECT image FROM equipment WHERE id = ?");
+              $stmt->bind_param("i", $edit_id);
+              $stmt->execute();
+              $result = $stmt->get_result();
+              
+              if ($result->num_rows > 0) {
+                  $row = $result->fetch_assoc();
+                  $existing_image_path = $row['image'];
+                  $edit_image = $existing_image_path;
+              } 
+        }
+    
+        // Prepare and execute the SQL query to update the equipment data
+        $stmt = $con->prepare("UPDATE equipment SET equipment_name=?, quantity=?, image=?, updated_at=? WHERE id=?");
+        $edit_updated_at = date("F d, Y h:i:s A");
+        $stmt->bind_param("ssssi", $edit_equipment_name, $edit_quantity, $edit_image, $edit_updated_at, $edit_id);
+    
+        if ($stmt->execute() === TRUE) {
+            $_SESSION['statuss'] = "Equipment updated successfully";
+            $_SESSION['status_code'] = "success";
+        } else {
+            $_SESSION['statuss'] = "Error updating equipment";
+            $_SESSION['status_code'] = "error";
+        }
+    
+    } elseif (isset($_POST['delete_id'])) {
+        $delete_id = $_POST['delete_id'];
+
+        // Prepare and execute the SQL query to delete the record
+        $stmt = $con->prepare("DELETE FROM equipment WHERE id = ?");
+        $stmt->bind_param("i", $delete_id);
+
+        if ($stmt->execute() === TRUE) {
+            $_SESSION['statuss'] = "Record deleted successfully";
+            $_SESSION['status_code'] = "success";
+        } else {
+            $_SESSION['statuss'] = "Error deleting record";
+            $_SESSION['status_code'] = "error";
+        }
+
+        $stmt->close();
     } else {
-      $_SESSION['statuss'] = "Error, updating doctor";
-      $_SESSION['status_code'] = "error";
-    }
-
-    $stmt->close();
-  } elseif (isset($_POST['name']) && isset($_POST['contactNumber']) && isset($_POST['dateOfEmployment']) && isset($_POST['status'])) {
-
-    // Add a new doctor
-    $name = $_POST["name"];
-    $contactNumber = $_POST["contactNumber"];
-    $dateOfEmployment = $_POST["dateOfEmployment"];
-    $status = $_POST["status"];
-
-    // Check if the full name already exists in the database
-    $existingNameQuery = "SELECT * FROM doctors WHERE full_name = ?";
-    $existingNameStmt = $con->prepare($existingNameQuery);
-    $existingNameStmt->bind_param("s", $name);
-    $existingNameStmt->execute();
-    $existingNameResult = $existingNameStmt->get_result();
-
-    if ($existingNameResult->num_rows > 0) {
-
-      // Full name already exists in the database
-      echo "Error, full name already exists in the database";
-    } else {
-
-      // Full name does not exist, proceed with insertion
-      $stmt = $con->prepare("INSERT INTO doctors (full_name, contact_number, status, created_at) VALUES (?, ?, ?, ?)");
-      $stmt->bind_param("ssss", $name, $contactNumber, $status, $dateOfEmployment);
-
-      if ($stmt->execute() === TRUE) {
-        $_SESSION['statuss'] = "Doctor added successfully";
-        $_SESSION['status_code'] = "success";
-      } else {
-        $_SESSION['statuss'] = "Error, adding doctor";
+        $_SESSION['statuss'] = "Invalid form submission";
         $_SESSION['status_code'] = "error";
-      }
-
-      $stmt->close();
     }
-
-    $existingNameStmt->close();
-  } else {
-    echo "All fields are required";
-  }
 }
 
-
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -88,7 +153,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/Ortho.jpg">
   <title>
-    OMDC - Add Doctor
+    OMDC - Equipment
   </title>
   <!--     Fonts and icons     -->
   <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900|Roboto+Slab:400,700" />
@@ -198,7 +263,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-white " href="../pages1/equipment.php">
+          <a class="nav-link text-white active bg-gradient-primary" href="../pages1/equipment.php">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
               <i class="material-icons opacity-10">inventory</i>
             </div>
@@ -217,7 +282,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Configuration</h6>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-white active bg-gradient-primary" href="../pages1/add_doctor.php">
+          <a class="nav-link text-white " href="../pages1/add_doctor.php">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
               <i class="material-icons opacity-10">person</i>
             </div>
@@ -262,9 +327,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li>
-            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Add Doctor</li>
+            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Equipment</li>
           </ol>
-          <h6 class="font-weight-bolder mb-0">Add Doctor</h6>
+          <h6 class="font-weight-bolder mb-0">Equipment</h6>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
         </div>
@@ -360,7 +425,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           icon: "<?php echo $_SESSION['status_code']; ?>",
           button: "OK",
         }).then(function() {
-          window.location.href = "add_doctor.php";
+          window.location.href = "equipment.php";
         });
       </script>
     <?php
@@ -369,7 +434,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ?>
     <!-- End Navbar -->
     <div class="container-fluid py-4">
-      <a class="btn bg-gradient-dark mb-0" id="add_myBtn" href="javascript:;"><i class="material-icons text-sm">add</i>&nbsp;&nbsp;Add New Doctor</a>
+      <a class="btn bg-gradient-dark mb-0" id="add_myBtn" href="javascript:;"><i class="material-icons text-sm">add</i>&nbsp;&nbsp;Equipment</a>
 
       <!-- The Modal -->
       <div id="add_myModal" class="modal">
@@ -378,37 +443,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="modal-content">
           <div class="modal-header">
             <span class="close">&times;</span>
-            <h3>Add Doctor</h3>
+            <h3>Add Equipment</h3>
           </div>
           <div class="modal-body">
-            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-              <div class="form-group">
-                <label for="name">Full Name:</label>
-                <input type="text" class="form-control" id="name" name="name" placeholder="Enter name" required>
-              </div>
-              <div class="form-group">
-                <label for="contactNumber">Contact Number:</label>
-                <input type="number" class="form-control" id="contactNumber" name="contactNumber" placeholder="Enter contact number" required>
-              </div>
-              <div class="form-group">
-                <label for="dateOfEmployment">Date of Employment:</label>
-                <input type="date" class="form-control" id="dateOfEmployment" name="dateOfEmployment" required>
-              </div>
-              <div class="form-group">
-                <label for="status">Status:</label>
-                <select class="form-control" id="status" name="status" required>
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-              </div>
-              <div class="row justify-content-end">
-                <div class="col-auto"><br>
-                  <button type="submit" class="btn btn-primary">
-                    <i class="material-icons text-sm">save</i>&nbsp;&nbsp;Add Doctor
-                  </button>
+          <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="name">Equipment Name:</label>
+                    <input type="text" class="form-control" id="equipment_name" name="equipment_name" placeholder="Enter equipment name" required>
                 </div>
-              </div>
+                <!-- <div class="form-group">
+                    <label for="expiration_date">Expiration Date:</label>
+                    <input type="date" class="form-control" id="expiration_date" name="expiration_date" required>
+                </div> -->
+                <div class="form-group">
+                    <label for="quantity">Quantity:</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <button type="button" class="btn btn-outline-secondary" id="minus-btn">-</button>
+                        </div>
+                        <input type="number" class="form-control" id="quantity" name="quantity" placeholder="Enter quantity" required>
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-outline-secondary" id="plus-btn">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group text-center">
+                    <label for="image">Image of the equipment:</label><br>
+                    <input type="file" class="btn bg-gradient-dark mb-0" id="image" name="image" accept=".jpg,.png,.jpeg,.gif">
+                </div>
+
+                <div class="row justify-content-end">
+                    <div class="col-auto"><br>
+                        <button type="submit" class="btn btn-primary" name="add_submit">
+                            <i class="material-icons text-sm">save</i>&nbsp;&nbsp;Add Equipment
+                        </button>
+                    </div>
+                </div>
             </form>
+
+
           </div>
         </div>
 
@@ -422,7 +495,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="card my-4">
           <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-0">
             <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
-              <h6 class="text-white text-capitalize ps-3">List of Doctors</h6>
+              <h6 class="text-white text-capitalize ps-3">List of Equipments</h6>
             </div>
           </div>
           <div class="card-body px-0 pb-2">
@@ -430,10 +503,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
               <table id="myTable" class="table align-items-center mb-0">
                 <thead>
                   <tr>
-                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Name</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Contact Number</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Employed</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Image</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Equipment Name</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quantity</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date Created</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date Updated</th>
                     <th class="text-secondary opacity-7"></th>
                   </tr>
                 </thead>
@@ -446,28 +520,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                       echo "<td>";
                       echo "<div class='d-flex px-2 py-1'>";
                       echo "<div>";
-                      echo "<img src='../assets/img/doctor.png' class='avatar avatar-sm me-3 border-radius-lg' alt='user'>";
-                      echo "</div>";
-                      echo "<div class='d-flex flex-column justify-content-center'>";
-                      echo "<h6 class='mb-0 text-sm'>" . $row['full_name'] . "</h6>";
+                      echo "<img src='" . $row['image'] . "' class='avatar me-3 border-radius-lg' style='width: 150px; height: 150px;' alt='user'>";
                       echo "</div>";
                       echo "</div>";
                       echo "</td>";
                       echo "<td class='align-middle text-center'>";
-                      echo "<span class='text-secondary text-xs font-weight-bold'>" . $row['contact_number'] . "</span>";
+                      echo "<span class='text-secondary text-xs font-weight-bold'>" . $row['equipment_name'] . "</span>";
                       echo "</td>";
                       echo "<td class='align-middle text-center text-sm'>";
-                      if ($row['status'] == 'Active') {
-                        echo "<span class='badge badge-sm bg-gradient-success'>" . $row['status'] . "</span>";
-                      } else {
-                        echo "<span class='badge badge-sm bg-gradient-secondary'>" . $row['status'] . "</span>";
-                      }
+                      echo "<span class='text-secondary text-xs font-weight-bold'>" . $row['quantity'] . "</span>";
                       echo "</td>";
                       echo "<td class='align-middle text-center'>";
-                      echo "<span class='text-secondary text-xs font-weight-bold'>" . $row['created_at'] . "</span>";
+                      echo "<span class='text-secondary text-xs font-weight-bold'>" . date('F j, Y h:i:s A', strtotime($row['created_at'])) . "</span>";
+                      echo "</td>";
+                      echo "<td class='align-middle text-center'>";
+                      if ($row['updated_at'] == null) {
+                        echo "<span class='text-danger text-xs font-weight-bold'>No changes yet</span>";
+                      } else {
+                        echo "<span class='text-secondary text-xs font-weight-bold'>" . date('F j, Y h:i:s A', strtotime($row['updated_at'])) . "</span>";
+                      }
                       echo "</td>";
                       echo "<td class='align-middle'>";
-                      echo '<button class="btn btn-primary update-btn" id="myBtn_' . $row['id'] . '" data-id="' . $row['id'] . '">Edit</button>';
+                      echo '<button class="btn btn-primary me-2 update-btn" id="myBtn_' . $row['id'] . '" data-id="' . $row['id'] . '">Edit</button>';
+                      echo '<form id="deleteForm_' . $row['id'] . '" method="post" action=" ">
+                                <input type="hidden" name="delete_id" value="' . $row['id'] . '">
+                                <button type="button" class="btn btn-danger delete-btn" data-id="' . $row['id'] . '">Delete</button>
+                            </form>';
                       echo "</td>";
                       echo "</tr>";
                     }
@@ -489,38 +567,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="modal-content">
       <div class="modal-header">
         <span class="close">&times;</span>
-        <h3>Edit Doctor</h3>
+        <h3>Edit Equipment</h3>
       </div>
       <div class="modal-body">
-        <form id="editForm" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-          <input type="hidden" id="edit_id" name="edit_id">
-          <div class="form-group">
-            <label for="edit_name">Full Name:</label>
-            <input type="text" class="form-control" id="edit_name" name="edit_name" placeholder="Enter name" required>
-          </div>
-          <div class="form-group">
-            <label for="edit_contactNumber">Contact Number:</label>
-            <input type="number" class="form-control" id="edit_contactNumber" name="edit_contactNumber" placeholder="Enter contact number" required>
-          </div>
-          <div class="form-group">
-            <label for="edit_dateOfEmployment">Date of Employment:</label>
-            <input type="date" class="form-control" id="edit_dateOfEmployment" name="edit_dateOfEmployment" required>
-          </div>
-          <div class="form-group">
-            <label for="edit_status">Status:</label>
-            <select class="form-control" id="edit_status" name="edit_status" required>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
-          </div>
-          <div class="row justify-content-end">
-            <div class="col-auto"><br>
-              <button type="submit" class="btn btn-primary">
-                <i class="material-icons text-sm">save</i>&nbsp;&nbsp;Save Changes
-              </button>
+      <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" enctype="multipart/form-data">
+            <input type="hidden" id="edit_id" name="edit_id">
+            <div class="form-group">
+                <label for="edit_equipment_name">Equipment Name:</label>
+                <input type="text" class="form-control" id="edit_equipment_name" name="edit_equipment_name" placeholder="Enter equipment name" required>
             </div>
-          </div>
+            <!-- <div class="form-group">
+                <label for="edit_expiration_date">Expiration Date:</label>
+                <input type="date" class="form-control" id="edit_expiration_date" name="edit_expiration_date" required>
+            </div> -->
+            <div class="form-group">
+                    <label for="quantity">Quantity:</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <button type="button" class="btn btn-outline-secondary" id="edit_minus-btn">-</button>
+                        </div>
+                        <input type="number" class="form-control" id="edit_quantity" name="edit_quantity" placeholder="Enter quantity" required>
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-outline-secondary" id="edit_plus-btn">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group text-center">
+                    <label for="edit_image">Image of the equipment:</label><br>
+                    <img id="edit_image_preview" class="img-fluid" style="max-width: 300px;" alt="Image preview"><br>
+                    <!-- <input type="text" id="edit_image_preview" name="edit_image_preview"> -->
+                    <input type="file" class="btn bg-gradient-dark mb-0" id="edit_image" name="edit_image" accept=".jpg,.png,.jpeg,.gif">
+                </div>
+            <div class="row justify-content-end">
+                <div class="col-auto"><br>
+                    <button type="submit" class="btn btn-primary" name="edit_submit">
+                        <i class="material-icons text-sm">save</i>&nbsp;&nbsp;Save Changes
+                    </button>
+                </div>
+            </div>
         </form>
+
       </div>
     </div>
   </div>
@@ -614,7 +700,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Add Doctor Modal
+      // Add equipment Modal
       var addModal = document.getElementById("add_myModal");
       var addBtn = document.getElementById("add_myBtn");
       var addSpan = addModal.getElementsByClassName("close")[0];
@@ -636,14 +722,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   </script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Edit Doctor Modal
-      var editModal = document.getElementById("edit_myModal"); 
+      // Edit equipment Modal
+      var editModal = document.getElementById("edit_myModal"); // Corrected modal ID
       var editSpan = editModal.getElementsByClassName("close")[0];
       var editForm = document.getElementById("editForm");
 
+      // Function to fetch equipment data via AJAX
       function fetchDoctorData(id) {
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "fetch_doctor_data.php?id=" + id, true);
+        xhr.open("GET", "fetch_equipment_data.php?id=" + id, true);
         xhr.onreadystatechange = function() {
           if (xhr.readyState === 4 && xhr.status === 200) {
             var data = JSON.parse(xhr.responseText);
@@ -656,11 +743,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       // Populate edit form fields with fetched data
       function populateEditForm(data) {
         document.getElementById("edit_id").value = data.id;
-        document.getElementById("edit_name").value = data.full_name;
-        document.getElementById("edit_contactNumber").value = data.contact_number;
-        document.getElementById("edit_dateOfEmployment").value = data.created_at;
-        document.getElementById("edit_status").value = data.status;
-      }
+        document.getElementById("edit_equipment_name").value = data.equipment_name;
+        // document.getElementById("edit_expiration_date").value = data.expiration_date;
+        document.getElementById("edit_quantity").value = data.quantity;
+
+        // Display the image using an <img> tag
+        var imageElement = document.getElementById("edit_image_preview");
+        imageElement.src = data.image;
+    }
 
       // Edit button click event
       var editBtns = document.querySelectorAll(".update-btn");
@@ -683,6 +773,100 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       }
     });
   </script>
+<script>
+document.getElementById('edit_plus-btn').addEventListener('click', function() {
+    var quantityInput = document.getElementById('edit_quantity');
+    var currentValue = quantityInput.value.trim() === '' ? 0 : parseInt(quantityInput.value);
+    var newValue = currentValue + 1;
+    quantityInput.value = newValue;
+    validateQuantityInput();
+});
+
+document.getElementById('edit_minus-btn').addEventListener('click', function() {
+    var quantityInput = document.getElementById('edit_quantity');
+    var currentValue = quantityInput.value.trim() === '' ? 0 : parseInt(quantityInput.value);
+    var newValue = currentValue - 1;
+    quantityInput.value = newValue >= 0 ? newValue : 0;
+    validateQuantityInput();
+});
+
+document.getElementById('edit_quantity').addEventListener('input', function() {
+    var quantityInput = this;
+    if (isNaN(parseInt(quantityInput.value))) {
+        quantityInput.value = 0;
+    }
+    validateQuantityInput();
+});
+
+function validateQuantityInput() {
+    var quantityInput = document.getElementById('edit_quantity');
+    var addButton = document.getElementById('edit_plus-btn');
+    var minusButton = document.getElementById('edit_minus-btn');
+
+    if (quantityInput.value.trim() === '' || parseInt(quantityInput.value) <= 0) {
+        addButton.disabled = false;
+        minusButton.disabled = true;
+        quantityInput.setCustomValidity('Please enter a valid quantity.');
+    } else {
+        addButton.disabled = false;
+        minusButton.disabled = false;
+        quantityInput.setCustomValidity('');
+    }
+}
+</script>
+<script>
+document.getElementById('plus-btn').addEventListener('click', function() {
+    var quantityInput = document.getElementById('quantity');
+    var currentValue = quantityInput.value.trim() === '' ? 0 : parseInt(quantityInput.value);
+    var newValue = currentValue + 1;
+    quantityInput.value = newValue;
+    validateQuantityInput();
+});
+
+document.getElementById('minus-btn').addEventListener('click', function() {
+    var quantityInput = document.getElementById('quantity');
+    var currentValue = quantityInput.value.trim() === '' ? 0 : parseInt(quantityInput.value);
+    var newValue = currentValue - 1;
+    quantityInput.value = newValue >= 0 ? newValue : 0;
+    validateQuantityInput();
+});
+
+document.getElementById('quantity').addEventListener('input', function() {
+    var quantityInput = this;
+    if (isNaN(parseInt(quantityInput.value))) {
+        quantityInput.value = 0;
+    }
+    validateQuantityInput();
+});
+
+function validateQuantityInput() {
+    var quantityInput = document.getElementById('quantity');
+    var addButton = document.getElementById('plus-btn');
+    var minusButton = document.getElementById('minus-btn');
+
+    if (quantityInput.value.trim() === '' || parseInt(quantityInput.value) <= 0) {
+        addButton.disabled = false;
+        minusButton.disabled = true;
+        quantityInput.setCustomValidity('Please enter a valid quantity.');
+    } else {
+        addButton.disabled = false;
+        minusButton.disabled = false;
+        quantityInput.setCustomValidity('');
+    }
+}
+</script>
+<script>
+document.querySelectorAll('.delete-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        if (confirm('Are you sure you want to delete this record?')) {
+            const formId = 'deleteForm_' + this.dataset.id;
+            document.getElementById(formId).submit();
+        }
+    });
+});
+</script>
+
+
 </body>
 
 </html>

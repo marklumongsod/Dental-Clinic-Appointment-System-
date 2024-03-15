@@ -385,8 +385,8 @@ include('../dbconnect.php');
   <script>
     $(document).ready(function() {
       $('#myTable').DataTable({
-        "pagingType": "simple", // optional: change the pagination style
-        // Add other options here if needed
+        "pagingType": "simple", 
+    
       });
     });
   </script>

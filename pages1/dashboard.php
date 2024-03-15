@@ -1,7 +1,16 @@
 <?php
+session_start();
 include('../dbconnect.php');
 
-// SQL query to select all doctors
+if (!isset($_SESSION['id'])) {
+
+  $_SESSION['error_message'] = "You must log in to access this page.";
+  header("Location: sign-in.php");
+  exit();
+}
+
+
+// select all doctors
 $sql = "SELECT * FROM doctors order by id asc";
 $result = $con->query($sql);
 
@@ -27,13 +36,13 @@ $row = $result_clients->fetch_assoc();
 $totalclients = $row["total_clients"];
 
 // count total completed bookings
-$sql = "SELECT COUNT(*) AS total_booking FROM booking_applicant WHERE remark = 'Complete'";
+$sql = "SELECT COUNT(*) AS total_booking FROM booking_applicant WHERE remark = 'Completed'";
 $result_completed = $con->query($sql);
 
 $row = $result_completed->fetch_assoc();
 $totalcompleted = $row["total_booking"];
 
-// SQL to display applicant names in doctor assigning
+// display applicant names in doctor assigning
 $sql = "SELECT * FROM booking_applicant WHERE doctor_assigned IS NULL OR doctor_assigned = ''";
 $result1 = $con->query($sql);
 
@@ -49,7 +58,7 @@ if (isset($_POST['submit'])) {
   $doctor_result = $doctor_stmt->get_result();
 
   if ($doctor_result->num_rows > 0) {
-    // Fetch doctor details
+    
     $doctor_row = $doctor_result->fetch_assoc();
     $doctor_name = $doctor_row['full_name'];
 
@@ -70,9 +79,6 @@ if (isset($_POST['submit'])) {
     echo "Doctor not found.";
   }
 
-  // Close statements
-  $doctor_stmt->close();
-  $update_stmt->close();
 }
 
 
@@ -153,7 +159,7 @@ if (isset($_POST['submit'])) {
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-white opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
       <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/material-dashboard/pages/dashboard " target="_blank">
-        <img src="../assets/img/Ortho.jpg" class="navbar-brand-img h-100" alt="main_logo">
+        <img src="../assets/Ortho.png" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold text-white">OrthoMagic Dental Clinic</span>
       </a>
     </div>
@@ -184,12 +190,23 @@ if (isset($_POST['submit'])) {
             <span class="nav-link-text ms-1">Patient Record</span>
           </a>
         </li>
+        <li class="nav-item mt-3">
+          <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Inventory</h6>
+        </li>
         <li class="nav-item">
-          <a class="nav-link text-white " href="../pages1/inventory.php">
+          <a class="nav-link text-white " href="../pages1/medicine.php">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i class="material-icons opacity-10">format_textdirection_r_to_l</i>
+              <i class="material-icons opacity-10">medication</i>
             </div>
-            <span class="nav-link-text ms-1">Inventory</span>
+            <span class="nav-link-text ms-1">Medicine</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white " href="../pages1/equipment.php">
+            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="material-icons opacity-10">inventory</i>
+            </div>
+            <span class="nav-link-text ms-1">Equipment</span>
           </a>
         </li>
         <!-- <li class="nav-item">
@@ -201,7 +218,7 @@ if (isset($_POST['submit'])) {
           </a>
         </li> -->
         <li class="nav-item mt-3">
-          <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Configuration Page</h6>
+          <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Configuration</h6>
         </li>
         <li class="nav-item">
           <a class="nav-link text-white " href="../pages1/add_doctor.php">
@@ -212,13 +229,21 @@ if (isset($_POST['submit'])) {
           </a>
         </li>
         <li class="nav-item">
+                <a class="nav-link text-white " href="../pages1/config_email.php">
+                    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                    <i class="material-icons opacity-10">assignment</i>
+                    </div>
+                    <span class="nav-link-text ms-1">Email Notification</span>
+                </a>
+                </li>
+        <!-- <li class="nav-item">
           <a class="nav-link text-white " href="../pages1/qr_payment.php">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
               <i class="material-icons opacity-10">assignment</i>
             </div>
             <span class="nav-link-text ms-1">QR Code Payment</span>
           </a>
-        </li>
+        </li> -->
         <li class="nav-item mt-3">
           <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Account</h6>
         </li>
@@ -258,78 +283,68 @@ if (isset($_POST['submit'])) {
             </a>
           </li>
           <li class="nav-item dropdown pe-2 d-flex align-items-center">
-            <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fa fa-bell cursor-pointer"></i>
-            </a>
-            <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
-              <li class="mb-2">
-                <a class="dropdown-item border-radius-md" href="javascript:;">
-                  <div class="d-flex py-1">
-                    <div class="my-auto">
-                      <img src="../assets/img/team-2.jpg" class="avatar avatar-sm  me-3 ">
-                    </div>
-                    <div class="d-flex flex-column justify-content-center">
-                      <h6 class="text-sm font-weight-normal mb-1">
-                        <span class="font-weight-bold">New message</span> from Laur
-                      </h6>
-                      <p class="text-xs text-secondary mb-0">
-                        <i class="fa fa-clock me-1"></i>
-                        13 minutes ago
-                      </p>
-                    </div>
-                  </div>
-                </a>
-              </li>
-              <li class="mb-2">
-                <a class="dropdown-item border-radius-md" href="javascript:;">
-                  <div class="d-flex py-1">
-                    <div class="my-auto">
-                      <img src="../assets/img/small-logos/logo-spotify.svg" class="avatar avatar-sm bg-gradient-dark  me-3 ">
-                    </div>
-                    <div class="d-flex flex-column justify-content-center">
-                      <h6 class="text-sm font-weight-normal mb-1">
-                        <span class="font-weight-bold">New album</span> by Travis Scott
-                      </h6>
-                      <p class="text-xs text-secondary mb-0">
-                        <i class="fa fa-clock me-1"></i>
-                        1 day
-                      </p>
-                    </div>
-                  </div>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item border-radius-md" href="javascript:;">
-                  <div class="d-flex py-1">
-                    <div class="avatar avatar-sm bg-gradient-secondary  me-3  my-auto">
-                      <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                        <title>credit-card</title>
-                        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                          <g transform="translate(-2169.000000, -745.000000)" fill="#FFFFFF" fill-rule="nonzero">
-                            <g transform="translate(1716.000000, 291.000000)">
-                              <g transform="translate(453.000000, 454.000000)">
-                                <path class="color-background" d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z" opacity="0.593633743"></path>
-                                <path class="color-background" d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z"></path>
-                              </g>
-                            </g>
-                          </g>
-                        </g>
-                      </svg>
-                    </div>
-                    <div class="d-flex flex-column justify-content-center">
-                      <h6 class="text-sm font-weight-normal mb-1">
-                        Payment successfully completed
-                      </h6>
-                      <p class="text-xs text-secondary mb-0">
-                        <i class="fa fa-clock me-1"></i>
-                        2 days
-                      </p>
-                    </div>
-                  </div>
-                </a>
-              </li>
-            </ul>
-          </li>
+                        <a href="javascript:;" class="nav-link text-body p-0 position-relative" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-bell cursor-pointer"></i>
+                            <?php
+                            // Fetch the count of unread notifications
+                            $unread_query = "SELECT COUNT(*) AS unread_count FROM notification_log WHERE is_read = 0";
+                            $unread_result = $con->query($unread_query);
+                            $unread_count = ($unread_result->num_rows > 0) ? $unread_result->fetch_assoc()['unread_count'] : 0;
+
+                            // Display the red label if there are unread notifications
+                            if ($unread_count > 0) {
+                                echo '<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">';
+                                echo $unread_count;
+                                echo '<span class="visually-hidden">unread messages</span>';
+                                echo '</span>';
+                            }
+                            ?>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
+                            <div class="d-flex flex-column justify-content-center">
+                                <?php
+                                // Fetch notification logs from the database
+                                $log_query = "SELECT * FROM notification_log ORDER BY notification_date DESC LIMIT 5"; // Fetch the latest 5 notifications
+                                $log_result = $con->query($log_query);
+
+                                // Check if there are any notifications
+                                if ($log_result->num_rows > 0) {
+                                    while ($row = $log_result->fetch_assoc()) {
+                                        $notification_id = $row['id']; // Assuming 'id' is the primary key of your notification_log table
+                                        $notification_message = $row['notification_message'];
+                                        $notification_date = date('M j, Y g:i A', strtotime($row['notification_date'])); // Format the notification date
+
+                                        // Mark the notification as read
+                                        $update_stmt = $con->prepare("UPDATE notification_log SET is_read = 1 WHERE id = ?");
+                                        $update_stmt->bind_param("i", $notification_id);
+                                        $update_stmt->execute();
+
+                                        echo '<li class="mb-2">';
+                                        echo '<a class="dropdown-item border-radius-md" href="javascript:;">';
+                                        echo '<div class="d-flex py-1">';
+                                        echo '<div class="my-auto">';
+                                        echo '<img src="../assets/img/Ortho.jpg" class="avatar avatar-sm me-3">';
+                                        echo '</div>';
+                                        echo '<div class="d-flex flex-column justify-content-center">';
+                                        echo '<h6 class="text-sm font-weight-normal mb-1">';
+                                        echo '<span class="font-weight-bold">New notification:</span> ' . $notification_message;
+                                        echo '</h6>';
+                                        echo '<p class="text-xs text-secondary mb-0">';
+                                        echo '<i class="fa fa-clock me-1"></i>' . $notification_date;
+                                        echo '</p>';
+                                        echo '</div>';
+                                        echo '</div>';
+                                        echo '</a>';
+                                        echo '</li>';
+                                    }
+                                } else {
+                                    // If there are no notifications
+                                    echo '<li class="dropdown-item text-center">No notifications</li>';
+                                }
+                                ?>
+                            </div>
+                        </ul>
+                    </li>
           <li class="nav-item d-flex align-items-center">
             <a class="nav-link text-body font-weight-bold px-0">
               <i class="fa fa-user me-sm-1"></i>
@@ -633,17 +648,17 @@ if (isset($_POST['submit'])) {
   </script>
 
 <script>
-    // Get all elements with the class "assign-btn"
+
     var buttons = document.querySelectorAll(".assign-btn");
     var modal = document.getElementById("myModal");
     var span = document.getElementsByClassName("close")[0];
 
-    // Add click event listeners to each button
+
     buttons.forEach(function(button) {
         button.onclick = function() {
-            // Get the data-id attribute value of the clicked button
+  
             var id = this.getAttribute("data-id");
-            // Set the value of the hidden input field to the data-id
+  
             document.getElementById("doctor_id").value = id;
             // Display the modal
             modal.style.display = "block";
@@ -671,7 +686,7 @@ if (isset($_POST['submit'])) {
 
           var doctorId = this.getAttribute('data-id');
 
-          // Log the doctor ID to the console
+          // Log the doctor ID 
           console.log('Doctor ID:', doctorId);
 
           document.getElementById('doctor_id').value = doctorId;

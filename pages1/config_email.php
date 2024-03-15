@@ -1,6 +1,48 @@
 <?php
+session_start();
 include('../dbconnect.php');
+
+if (!isset($_SESSION['id'])) {
+
+  $_SESSION['error_message'] = "You must log in to access this page.";
+  header("Location: sign-in.php");
+  exit();
+}
+
+if (isset($_POST["submit"])) { 
+
+    $email = $_POST["inputEmail"];
+
+    $check_query = "SELECT * FROM email_notification WHERE id = 1";
+    $check_result = mysqli_query($con, $check_query);
+
+    if (mysqli_num_rows($check_result) > 0) {
+
+        // Update the existing record
+        $update_query = "UPDATE email_notification SET email = '$email' WHERE id = 1";
+        if (mysqli_query($con, $update_query)) {
+            $_SESSION['statuss'] = "Email address updated successfully.";
+            $_SESSION['status_code'] = "success";
+        } else {
+            $_SESSION['statuss'] = "Error updating email address.";
+            $_SESSION['status_code'] = "error";
+        }
+    } else {
+
+        // Insert a new record
+        $insert_query = "INSERT INTO email_notification (id, email) VALUES (1, '$email')";
+        if (mysqli_query($con, $insert_query)) {
+            $_SESSION['statuss'] = "Email address stored successfully.";
+            $_SESSION['status_code'] = "success";
+        } else {
+            $_SESSION['statuss'] = "Error storing email address.";
+            $_SESSION['status_code'] = "error";
+        }
+    }
+}
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,7 +52,7 @@ include('../dbconnect.php');
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/Ortho.jpg">
   <title>
-    OMDC - Dashboard
+    OMDC - Email Notification
   </title>
   <!--     Fonts and icons     -->
   <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900|Roboto+Slab:400,700" />
@@ -26,6 +68,7 @@ include('../dbconnect.php');
   <!-- Nepcha Analytics (nepcha.com) -->
   <!-- Nepcha is a easy-to-use web analytics. No cookies and fully compliant with GDPR, CCPA and PECR. -->
   <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 </head>
 
 <body class="g-sidenav-show  bg-gray-200">
@@ -33,10 +76,11 @@ include('../dbconnect.php');
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-white opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
       <a class="navbar-brand m-0" href=" ">
-        <img src="../assets/img/Ortho.jpg" class="navbar-brand-img h-100" alt="main_logo">
+        <img src="../assets/Ortho.png" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold text-white">OrthoMagic Dental Clinic</span>
       </a>
     </div>
+  
     <hr class="horizontal light mt-0 mb-2">
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
@@ -64,12 +108,23 @@ include('../dbconnect.php');
             <span class="nav-link-text ms-1">Patient Record</span>
           </a>
         </li>
+        <li class="nav-item mt-3">
+          <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Inventory</h6>
+        </li>
         <li class="nav-item">
-          <a class="nav-link text-white " href="../pages1/inventory.php">
+          <a class="nav-link text-white " href="../pages1/medicine.php">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i class="material-icons opacity-10">format_textdirection_r_to_l</i>
+              <i class="material-icons opacity-10">medication</i>
             </div>
-            <span class="nav-link-text ms-1">Inventory</span>
+            <span class="nav-link-text ms-1">Medicine</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white " href="../pages1/equipment.php">
+            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="material-icons opacity-10">inventory</i>
+            </div>
+            <span class="nav-link-text ms-1">Equipment</span>
           </a>
         </li>
         <!-- <li class="nav-item">
@@ -81,7 +136,7 @@ include('../dbconnect.php');
           </a>
         </li> -->
         <li class="nav-item mt-3">
-          <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Configuration Page</h6>
+          <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Configuration</h6>
         </li>
         <li class="nav-item">
           <a class="nav-link text-white " href="../pages1/add_doctor.php">
@@ -92,11 +147,11 @@ include('../dbconnect.php');
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-white active bg-gradient-primary" href="../pages1/qr_payment.php">
+          <a class="nav-link text-white active bg-gradient-primary" href="../pages1/config_email.php">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
               <i class="material-icons opacity-10">assignment</i>
             </div>
-            <span class="nav-link-text ms-1">QR Code Payment</span>
+            <span class="nav-link-text ms-1">Email Notification</span>
           </a>
         </li>
         <li class="nav-item mt-3">
@@ -117,7 +172,7 @@ include('../dbconnect.php');
     <!-- Navbar -->
     <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" data-scroll="true">
       <div class="container-fluid py-1 px-3">
-        
+
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li>
@@ -126,119 +181,142 @@ include('../dbconnect.php');
           <h6 class="font-weight-bolder mb-0">QR code payment</h6>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
-          </div>
-          <ul class="navbar-nav  justify-content-end">
-            <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
-                <div class="sidenav-toggler-inner">
-                  <i class="sidenav-toggler-line"></i>
-                  <i class="sidenav-toggler-line"></i>
-                  <i class="sidenav-toggler-line"></i>
-                </div>
-              </a>
-            </li>
-            <li class="nav-item dropdown pe-2 d-flex align-items-center">
-              <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa fa-bell cursor-pointer"></i>
-              </a>
-              <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
-                <li class="mb-2">
-                  <a class="dropdown-item border-radius-md" href="javascript:;">
-                    <div class="d-flex py-1">
-                      <div class="my-auto">
-                        <img src="../assets/img/team-2.jpg" class="avatar avatar-sm  me-3 ">
-                      </div>
-                      <div class="d-flex flex-column justify-content-center">
-                        <h6 class="text-sm font-weight-normal mb-1">
-                          <span class="font-weight-bold">New message</span> from Laur
-                        </h6>
-                        <p class="text-xs text-secondary mb-0">
-                          <i class="fa fa-clock me-1"></i>
-                          13 minutes ago
-                        </p>
-                      </div>
-                    </div>
-                  </a>
-                </li>
-                <li class="mb-2">
-                  <a class="dropdown-item border-radius-md" href="javascript:;">
-                    <div class="d-flex py-1">
-                      <div class="my-auto">
-                        <img src="../assets/img/small-logos/logo-spotify.svg" class="avatar avatar-sm bg-gradient-dark  me-3 ">
-                      </div>
-                      <div class="d-flex flex-column justify-content-center">
-                        <h6 class="text-sm font-weight-normal mb-1">
-                          <span class="font-weight-bold">New album</span> by Travis Scott
-                        </h6>
-                        <p class="text-xs text-secondary mb-0">
-                          <i class="fa fa-clock me-1"></i>
-                          1 day
-                        </p>
-                      </div>
-                    </div>
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item border-radius-md" href="javascript:;">
-                    <div class="d-flex py-1">
-                      <div class="avatar avatar-sm bg-gradient-secondary  me-3  my-auto">
-                        <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                          <title>credit-card</title>
-                          <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                            <g transform="translate(-2169.000000, -745.000000)" fill="#FFFFFF" fill-rule="nonzero">
-                              <g transform="translate(1716.000000, 291.000000)">
-                                <g transform="translate(453.000000, 454.000000)">
-                                  <path class="color-background" d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z" opacity="0.593633743"></path>
-                                  <path class="color-background" d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z"></path>
-                                </g>
-                              </g>
-                            </g>
-                          </g>
-                        </svg>
-                      </div>
-                      <div class="d-flex flex-column justify-content-center">
-                        <h6 class="text-sm font-weight-normal mb-1">
-                          Payment successfully completed
-                        </h6>
-                        <p class="text-xs text-secondary mb-0">
-                          <i class="fa fa-clock me-1"></i>
-                          2 days
-                        </p>
-                      </div>
-                    </div>
-                  </a>
-                </li>
-              </ul>
-            </li>
-            <li class="nav-item d-flex align-items-center">
-              <a  class="nav-link text-body font-weight-bold px-0">
-                <i class="fa fa-user me-sm-1"></i>
-                <span class="d-sm-inline d-none">Administrator</span>
-              </a>
-            </li>
-          </ul>
         </div>
+        <ul class="navbar-nav  justify-content-end">
+          <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
+            <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
+              <div class="sidenav-toggler-inner">
+                <i class="sidenav-toggler-line"></i>
+                <i class="sidenav-toggler-line"></i>
+                <i class="sidenav-toggler-line"></i>
+              </div>
+            </a>
+          </li>
+          <li class="nav-item dropdown pe-2 d-flex align-items-center">
+                        <a href="javascript:;" class="nav-link text-body p-0 position-relative" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-bell cursor-pointer"></i>
+                            <?php
+                            // Fetch the count of unread notifications
+                            $unread_query = "SELECT COUNT(*) AS unread_count FROM notification_log WHERE is_read = 0";
+                            $unread_result = $con->query($unread_query);
+                            $unread_count = ($unread_result->num_rows > 0) ? $unread_result->fetch_assoc()['unread_count'] : 0;
+
+                            // Display the red label if there are unread notifications
+                            if ($unread_count > 0) {
+                                echo '<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">';
+                                echo $unread_count;
+                                echo '<span class="visually-hidden">unread messages</span>';
+                                echo '</span>';
+                            }
+                            ?>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
+                            <div class="d-flex flex-column justify-content-center">
+                                <?php
+                                // Fetch notification logs from the database
+                                $log_query = "SELECT * FROM notification_log ORDER BY notification_date DESC LIMIT 5"; // Fetch the latest 5 notifications
+                                $log_result = $con->query($log_query);
+
+                                // Check if there are any notifications
+                                if ($log_result->num_rows > 0) {
+                                    while ($row = $log_result->fetch_assoc()) {
+                                        $notification_id = $row['id']; // Assuming 'id' is the primary key of your notification_log table
+                                        $notification_message = $row['notification_message'];
+                                        $notification_date = date('M j, Y g:i A', strtotime($row['notification_date'])); // Format the notification date
+
+                                        // Mark the notification as read
+                                        $update_stmt = $con->prepare("UPDATE notification_log SET is_read = 1 WHERE id = ?");
+                                        $update_stmt->bind_param("i", $notification_id);
+                                        $update_stmt->execute();
+
+                                        echo '<li class="mb-2">';
+                                        echo '<a class="dropdown-item border-radius-md" href="javascript:;">';
+                                        echo '<div class="d-flex py-1">';
+                                        echo '<div class="my-auto">';
+                                        echo '<img src="../assets/img/Ortho.jpg" class="avatar avatar-sm me-3">';
+                                        echo '</div>';
+                                        echo '<div class="d-flex flex-column justify-content-center">';
+                                        echo '<h6 class="text-sm font-weight-normal mb-1">';
+                                        echo '<span class="font-weight-bold">New notification:</span> ' . $notification_message;
+                                        echo '</h6>';
+                                        echo '<p class="text-xs text-secondary mb-0">';
+                                        echo '<i class="fa fa-clock me-1"></i>' . $notification_date;
+                                        echo '</p>';
+                                        echo '</div>';
+                                        echo '</div>';
+                                        echo '</a>';
+                                        echo '</li>';
+                                    }
+                                } else {
+                                    // If there are no notifications
+                                    echo '<li class="dropdown-item text-center">No notifications</li>';
+                                }
+                                ?>
+                            </div>
+                        </ul>
+                    </li>
+          <li class="nav-item d-flex align-items-center">
+            <a class="nav-link text-body font-weight-bold px-0">
+              <i class="fa fa-user me-sm-1"></i>
+              <span class="d-sm-inline d-none">Administrator</span>
+            </a>
+          </li>
+        </ul>
+      </div>
       </div>
     </nav>
     <!-- End Navbar -->
     <div class="container-fluid py-4">
       <br>
-      
-      <div class="col-12">
 
+      <div class="col-12">
+      <?php
+        if (isset($_SESSION['statuss'])) {
+        ?>
+            <script>
+                swal({
+                    title: "<?php echo $_SESSION['statuss']; ?>",
+                    icon: "<?php echo $_SESSION['status_code']; ?>",
+                    button: "OK",
+                }).then(function() {
+                    window.location.href = "config_email.php";
+                });
+            </script>
+        <?php
+            unset($_SESSION['statuss']);
+        }
+        ?>
         <div class="card my-4">
           <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
             <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
-              <h6 class="text-white text-capitalize ps-3">CONFIGURATION UPLOAD QR CODE IMAGE</h6>
+              <h6 class="text-white text-capitalize ps-3">CONFIGURATION FOR NOTIFICATION</h6>
             </div>
           </div>
           <div class="card-body px-0 pb-2">
-            <div class="table-responsive p-4 text-center">
-                <label class="btn bg-gradient-dark mb-0" for="qrCodeImageUpload">
-                    <i class="material-icons text-sm">add</i>&nbsp;&nbsp;UPLOAD QR CODE IMAGE
-                </label>
-                <input type="file" id="qrCodeImageUpload" accept=".jpg, .jpeg, .png" style="display: none;">
-            </div>
+          <div class="table-responsive  px-12 p-0 text-center">
+              <form action="" method="POST">
+                  <label for="inputEmail" class="form-label">Enter Email Address:</label>
+                  <?php
+                    $sql = "SELECT * FROM email_notification WHERE id = 1";
+                    $result = $con->query($sql);
+
+                    if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                    ?>
+                            <input type="email" class="form-control px-0 text-center border border-2 border-primary" id="inputEmail" name="inputEmail" placeholder="Enter email" value="<?php echo $row['email']; ?>">
+                    <?php
+                        }
+                    }
+                    ?>
+                  <div class="row justify-content-center">
+                      <div class="col-auto"><br>
+                          <button type="submit" name="submit" class="btn btn-primary ">
+                              <i class="material-icons text-sm">save</i>&nbsp;&nbsp;Save Email
+                          </button>
+                      </div>
+                  </div>
+              </form>
+          </div>
           </div>
         </div>
       </div>
@@ -302,10 +380,10 @@ include('../dbconnect.php');
             <input class="form-check-input mt-1 ms-auto" type="checkbox" id="dark-version" onclick="darkMode(this)">
           </div>
         </div>
-        
-        </div>
+
       </div>
     </div>
+  </div>
   </div>
   <!--   Core JS Files   -->
   <script src="../assets/js1/core/popper.min.js"></script>
@@ -326,7 +404,7 @@ include('../dbconnect.php');
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="../assets/js1/material-dashboard.min.js?v=3.1.0"></script>
-  
+
 </body>
 
 </html>

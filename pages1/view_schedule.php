@@ -1,6 +1,97 @@
 <?php
+session_start();
 include('../dbconnect.php');
 
+if (!isset($_SESSION['id'])) {
+
+  $_SESSION['error_message'] = "You must log in to access this page.";
+  header("Location: sign-in.php");
+  exit();
+}
+date_default_timezone_set('Asia/Manila');
+if (isset($_POST["submit_import"])) {
+
+    if ($_FILES["file"]["error"] == UPLOAD_ERR_OK) {
+        $file = $_FILES["file"]["tmp_name"];
+        $handle = fopen($file, "r");
+
+        $isFirstRow = true; 
+        
+        $service_prices = array(
+            "Extraction" => 800,
+            "Resto" => 800,
+            "Denture" => 2500,
+            "Retainer" => 7000,
+            "Jacket" => 1000,
+            "Denture Flexible" => 18000,
+            "Veneers" => 8500,
+            "Xray per Tooth" => 400,
+            "OP/Cleaning" => 800,
+            "Check-Up" => 550,
+            "Root Canal" => 5000,
+            "Braces" => 45000,
+            "Whitening" => 1000
+        );
+
+        // Read the CSV file
+        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            if ($isFirstRow) {
+                $isFirstRow = false;
+                continue; 
+            }
+
+            $email = $data[1]; // Email Address
+            $name = $data[2]; // Name
+            $phone_number = $data[4]; // Phone number
+            $service = $data[5]; // Service
+            
+            // Get price for the service 
+            $price = isset($service_prices[$service]) ? $service_prices[$service] : 0;
+
+            $appointment_date = date('Y-m-d', strtotime($data[7])); // Date of Appointment
+            $appointment_time = $data[8]; // Time
+            $dental_records = $data[6]; // Dental Records
+            $proof_payment = $data[9]; // Proof Payment
+            $timestamp = $data[0]; // Timestamp
+
+            $randomNumber = str_pad(mt_rand(0, 99999), 10, '0', STR_PAD_LEFT);
+            $appointmentCode = "OM063-" . $randomNumber;
+
+
+            // Check if a record with the same timestamp and client name already exists
+            $existing_record_query = "SELECT COUNT(*) as count FROM booking_applicant WHERE timestamp = '$timestamp' AND name = '$name'";
+            $existing_record_result = $con->query($existing_record_query);
+            $existing_record_row = $existing_record_result->fetch_assoc();
+            $existing_record_count = $existing_record_row['count'];
+
+            if ($existing_record_count == 0) {
+
+                $current_datetime = date('Y-m-d h:i:s A');
+
+
+                $sql = "INSERT INTO booking_applicant (booking_id, appointment_code, name, email, phone_number, service, price, appointment_date, appointment_time, remark, date_created, doctor_assigned, dental_records, proof_payment, timestamp) 
+                      VALUES (' ', '$appointmentCode', '$name', '$email', '$phone_number', '$service', '$price', '$appointment_date', '$appointment_time', 'Pending', '$current_datetime', ' ', '$dental_records', '$proof_payment', '$timestamp')";
+
+                try {
+                    if ($con->query($sql) === TRUE) {
+                        $_SESSION['statuss'] = "Record inserted successfully";
+                        $_SESSION['status_code'] = "success";
+                    } else {
+                        throw new Exception("Error executing query: " . $sql . "<br>" . $con->error);
+                    }
+                } catch (Exception $e) {
+                    echo 'Caught exception: ', $e->getMessage(), "\n";
+                }
+            } else {
+                // echo "<center style='background-color: #FFCCCC;'>Skipping duplicate record for timestamp: $timestamp and client name: $name</center>";
+            }
+        }
+        fclose($handle);
+        // echo "Import done";
+    } else {
+        echo "Error uploading file";
+    }
+}
 
 if (isset($_POST['submit'])) {
   $applicant_id = $_POST['applicant_id'];
@@ -25,7 +116,7 @@ if (isset($_POST['submit'])) {
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="../assets/img/Ortho.jpg">
   <title>
-    OMDC - Dashboard
+    OMDC - View Schedule
   </title>
   <!--     Fonts and icons     -->
   <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900|Roboto+Slab:400,700" />
@@ -69,6 +160,7 @@ if (isset($_POST['submit'])) {
       outline: 0;
       box-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25);
     }
+
     .close {
       position: absolute;
       top: 10px;
@@ -92,7 +184,7 @@ if (isset($_POST['submit'])) {
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-white opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
       <a class="navbar-brand m-0" href="">
-        <img src="../assets/img/Ortho.jpg" class="navbar-brand-img h-100" alt="main_logo">
+        <img src="../assets/Ortho.png" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold text-white">OrthoMagic Dental Clinic</span>
       </a>
     </div>
@@ -123,12 +215,23 @@ if (isset($_POST['submit'])) {
             <span class="nav-link-text ms-1">Patient Record</span>
           </a>
         </li>
+        <li class="nav-item mt-3">
+          <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Inventory</h6>
+        </li>
         <li class="nav-item">
-          <a class="nav-link text-white " href="../pages1/inventory.php">
+          <a class="nav-link text-white " href="../pages1/medicine.php">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i class="material-icons opacity-10">format_textdirection_r_to_l</i>
+              <i class="material-icons opacity-10">medication</i>
             </div>
-            <span class="nav-link-text ms-1">Inventory</span>
+            <span class="nav-link-text ms-1">Medicine</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white " href="../pages1/equipment.php">
+            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="material-icons opacity-10">inventory</i>
+            </div>
+            <span class="nav-link-text ms-1">Equipment</span>
           </a>
         </li>
         <!-- <li class="nav-item">
@@ -140,7 +243,7 @@ if (isset($_POST['submit'])) {
           </a>
         </li> -->
         <li class="nav-item mt-3">
-          <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Configuration Page</h6>
+          <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Configuration</h6>
         </li>
         <li class="nav-item">
           <a class="nav-link text-white " href="../pages1/add_doctor.php">
@@ -151,13 +254,21 @@ if (isset($_POST['submit'])) {
           </a>
         </li>
         <li class="nav-item">
+                <a class="nav-link text-white " href="../pages1/config_email.php">
+                    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                    <i class="material-icons opacity-10">assignment</i>
+                    </div>
+                    <span class="nav-link-text ms-1">Email Notification</span>
+                </a>
+                </li>
+        <!-- <li class="nav-item">
           <a class="nav-link text-white " href="../pages1/qr_payment.php">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
               <i class="material-icons opacity-10">assignment</i>
             </div>
             <span class="nav-link-text ms-1">QR Code Payment</span>
           </a>
-        </li>
+        </li> -->
         <li class="nav-item mt-3">
           <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Account</h6>
         </li>
@@ -197,78 +308,68 @@ if (isset($_POST['submit'])) {
             </a>
           </li>
           <li class="nav-item dropdown pe-2 d-flex align-items-center">
-            <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fa fa-bell cursor-pointer"></i>
-            </a>
-            <ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
-              <li class="mb-2">
-                <a class="dropdown-item border-radius-md" href="javascript:;">
-                  <div class="d-flex py-1">
-                    <div class="my-auto">
-                      <img src="../assets/img/team-2.jpg" class="avatar avatar-sm  me-3 ">
-                    </div>
-                    <div class="d-flex flex-column justify-content-center">
-                      <h6 class="text-sm font-weight-normal mb-1">
-                        <span class="font-weight-bold">New message</span> from Laur
-                      </h6>
-                      <p class="text-xs text-secondary mb-0">
-                        <i class="fa fa-clock me-1"></i>
-                        13 minutes ago
-                      </p>
-                    </div>
-                  </div>
-                </a>
-              </li>
-              <li class="mb-2">
-                <a class="dropdown-item border-radius-md" href="javascript:;">
-                  <div class="d-flex py-1">
-                    <div class="my-auto">
-                      <img src="../assets/img/small-logos/logo-spotify.svg" class="avatar avatar-sm bg-gradient-dark  me-3 ">
-                    </div>
-                    <div class="d-flex flex-column justify-content-center">
-                      <h6 class="text-sm font-weight-normal mb-1">
-                        <span class="font-weight-bold">New album</span> by Travis Scott
-                      </h6>
-                      <p class="text-xs text-secondary mb-0">
-                        <i class="fa fa-clock me-1"></i>
-                        1 day
-                      </p>
-                    </div>
-                  </div>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item border-radius-md" href="javascript:;">
-                  <div class="d-flex py-1">
-                    <div class="avatar avatar-sm bg-gradient-secondary  me-3  my-auto">
-                      <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                        <title>credit-card</title>
-                        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                          <g transform="translate(-2169.000000, -745.000000)" fill="#FFFFFF" fill-rule="nonzero">
-                            <g transform="translate(1716.000000, 291.000000)">
-                              <g transform="translate(453.000000, 454.000000)">
-                                <path class="color-background" d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z" opacity="0.593633743"></path>
-                                <path class="color-background" d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z"></path>
-                              </g>
-                            </g>
-                          </g>
-                        </g>
-                      </svg>
-                    </div>
-                    <div class="d-flex flex-column justify-content-center">
-                      <h6 class="text-sm font-weight-normal mb-1">
-                        Payment successfully completed
-                      </h6>
-                      <p class="text-xs text-secondary mb-0">
-                        <i class="fa fa-clock me-1"></i>
-                        2 days
-                      </p>
-                    </div>
-                  </div>
-                </a>
-              </li>
-            </ul>
-          </li>
+                        <a href="javascript:;" class="nav-link text-body p-0 position-relative" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-bell cursor-pointer"></i>
+                            <?php
+                            // Fetch the count of unread notifications
+                            $unread_query = "SELECT COUNT(*) AS unread_count FROM notification_log WHERE is_read = 0";
+                            $unread_result = $con->query($unread_query);
+                            $unread_count = ($unread_result->num_rows > 0) ? $unread_result->fetch_assoc()['unread_count'] : 0;
+
+                            // Display the red label if there are unread notifications
+                            if ($unread_count > 0) {
+                                echo '<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">';
+                                echo $unread_count;
+                                echo '<span class="visually-hidden">unread messages</span>';
+                                echo '</span>';
+                            }
+                            ?>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
+                            <div class="d-flex flex-column justify-content-center">
+                                <?php
+                                // Fetch notification logs from the database
+                                $log_query = "SELECT * FROM notification_log ORDER BY notification_date DESC LIMIT 5"; // Fetch the latest 5 notifications
+                                $log_result = $con->query($log_query);
+
+                                // Check if there are any notifications
+                                if ($log_result->num_rows > 0) {
+                                    while ($row = $log_result->fetch_assoc()) {
+                                        $notification_id = $row['id']; // Assuming 'id' is the primary key of your notification_log table
+                                        $notification_message = $row['notification_message'];
+                                        $notification_date = date('M j, Y g:i A', strtotime($row['notification_date'])); // Format the notification date
+
+                                        // Mark the notification as read
+                                        $update_stmt = $con->prepare("UPDATE notification_log SET is_read = 1 WHERE id = ?");
+                                        $update_stmt->bind_param("i", $notification_id);
+                                        $update_stmt->execute();
+
+                                        echo '<li class="mb-2">';
+                                        echo '<a class="dropdown-item border-radius-md" href="javascript:;">';
+                                        echo '<div class="d-flex py-1">';
+                                        echo '<div class="my-auto">';
+                                        echo '<img src="../assets/img/Ortho.jpg" class="avatar avatar-sm me-3">';
+                                        echo '</div>';
+                                        echo '<div class="d-flex flex-column justify-content-center">';
+                                        echo '<h6 class="text-sm font-weight-normal mb-1">';
+                                        echo '<span class="font-weight-bold">New notification:</span> ' . $notification_message;
+                                        echo '</h6>';
+                                        echo '<p class="text-xs text-secondary mb-0">';
+                                        echo '<i class="fa fa-clock me-1"></i>' . $notification_date;
+                                        echo '</p>';
+                                        echo '</div>';
+                                        echo '</div>';
+                                        echo '</a>';
+                                        echo '</li>';
+                                    }
+                                } else {
+                                    // If there are no notifications
+                                    echo '<li class="dropdown-item text-center">No notifications</li>';
+                                }
+                                ?>
+                            </div>
+                        </ul>
+                    </li>
           <li class="nav-item d-flex align-items-center">
             <a class="nav-link text-body font-weight-bold px-0">
               <i class="fa fa-user me-sm-1"></i>
@@ -280,14 +381,22 @@ if (isset($_POST['submit'])) {
       </div>
     </nav>
     <!-- End Navbar -->
+
     <div class="container-fluid py-4">
+
+      <form action="" method="post" enctype="multipart/form-data">
+        <input class="btn bg-gradient-dark mb-0" type="file" name="file" accept=".csv">
+        <button class="btn bg-gradient-dark mb-0" type="submit" name="submit_import"><i class="material-icons text-sm">add</i>&nbsp;&nbsp;Import Csv</button>
+      </form>
+
+      <br>
       <br>
       <div class="col-12">
 
         <div class="card my-4">
-          <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+          <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-0">
             <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
-              <h6 class="text-white text-capitalize ps-3">List of Appointment</h6>
+              <h6 class="text-white text-capitalize ps-3">List of Appointments</h6>
             </div>
           </div>
           <div class="card-body px-0 pb-2">
@@ -311,7 +420,7 @@ if (isset($_POST['submit'])) {
                 </thead>
                 <tbody>
                   <?php
-                  $sql = "SELECT * FROM booking_applicant order by booking_id asc";
+                  $sql = "SELECT * FROM booking_applicant order by date_created desc";
                   $result = $con->query($sql);
                   if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
@@ -319,7 +428,7 @@ if (isset($_POST['submit'])) {
                       echo '<td>';
                       echo '<div class="d-flex px-2 py-1">';
                       echo '<div class="d-flex flex-column justify-content-center">';
-                      echo '<h6 class="mb-0 text-sm">' . $row['date_created'] . '</h6>';
+                      echo '<h6 class="mb-0 text-sm">' . date('F j, Y h:i:s A', strtotime($row['date_created'])) . '</h6>';
                       echo '</div>';
                       echo '</div>';
                       echo '</td>';
@@ -339,16 +448,20 @@ if (isset($_POST['submit'])) {
                       echo '<span class="text-secondary text-xs font-weight-bold">' . $row['service'] . '</span>';
                       echo '</td>';
                       echo '<td class="align-middle text-center">';
-                      echo '<span class="text-secondary text-xs font-weight-bold">' .'₱'. $row['price'] . '</span>';
+                      echo '<span class="text-secondary text-xs font-weight-bold">' . '₱' . number_format($row['price']) . '</span>';
                       echo '</td>';
                       echo '<td class="align-middle text-center">';
-                      echo '<span class="text-secondary text-xs font-weight-bold">' . $row['appointment_date'] . '</span>';
+                      echo '<span class="text-secondary text-xs font-weight-bold">' . date('F j, Y', strtotime($row['appointment_date'])) . '</span>';
                       echo '</td>';
                       echo '<td class="align-middle text-center text-sm">';
                       echo '<span class="text-secondary text-xs font-weight-bold">' . $row['appointment_time'] . '</span>';
                       echo '</td>';
                       echo '<td class="align-middle text-center text-sm">';
-                      echo '<span class="badge badge-sm bg-gradient-success">' . $row['doctor_assigned'] . '</span>';
+                      if (' '==($row['doctor_assigned'])) {
+                          echo '<span class="badge badge-sm bg-gradient-danger">Not assigned yet</span>';
+                      } else {
+                          echo '<span class="badge badge-sm bg-gradient-success">' . $row['doctor_assigned'] . '</span>';
+                      }
                       echo '</td>';
                       echo '<td class="align-middle text-center">';
                       echo '<span class="text-secondary text-xs font-weight-bold">' . $row['remark'] . '</span>';
@@ -388,7 +501,7 @@ if (isset($_POST['submit'])) {
               <option value=""></option>
               <option value="Failure to attend">Failure to attend</option>
               <option value="Cancelled">Cancelled</option>
-              <option value="Complete">Complete</option>
+              <option value="Completed">Completed</option>
             </select>
             <input type="hidden" name="applicant_id" id="applicant_id" value="">
           </div>
