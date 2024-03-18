@@ -10,8 +10,8 @@ if (!isset($_SESSION['id'])) {
   exit();
 }
 
-
-$sql = "SELECT * FROM medicine";
+$current_date = date('Y-m-d');
+$sql = "SELECT * FROM medicine WHERE expiration_date >= '$current_date'";
 $result = $con->query($sql);
 
 date_default_timezone_set('Asia/Manila');
